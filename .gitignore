@@ -1,0 +1,16 @@
+# 运行时状态与日志（不入库）
+scripts/.hub_state.json
+scripts/.companion_state.json
+scripts/hub.log
+scripts/state.json
+scripts/st2.json
+scripts/config_before_*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# IDE
+.idea/
+.vscode/

@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "name": "拙诚日课终端 · 日课打卡清单",
+    "note": "曾国藩日课十二条的触屏精简版。PhoneBox 原生 checklist 组件按行读取 items，勾选状态存在手机本地（cl:<page>/<widget>），每日自动重置。修改此文件后运行 python setup_checklist.py 重新推送即可。",
+    "widget_type": "checklist",
+    "target_page": "checkin",
+    "widget_ids": ["rike-checklist-a", "rike-checklist-b"],
+    "column_titles": ["日课 · 上（1-6）", "日课 · 下（7-12）"],
+    "daily_reset": true
+  },
+  "items": [
+    "主敬 · 整齐严肃，心不散乱",
+    "静坐 · 每日四刻，体验来复",
+    "早起 · 黎明即起，醒后勿恋",
+    "读书不二 · 一书未完不看他书",
+    "读史 · 每日圈点十叶",
+    "谨言 · 刻刻留心，第一工夫",
+    "养气 · 气藏丹田，无不可对人言",
+    "保身 · 节劳、节欲、节饮食",
+    "日知所亡 · 记录当日心得",
+    "月无忘所能 · 每月作诗文数首",
+    "作字 · 早饭后临帖半小时",
+    "夜不出门 · 戒旷功疲神"
+  ]
+}
