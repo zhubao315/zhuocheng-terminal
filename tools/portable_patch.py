@@ -38,6 +38,19 @@ def patch(path: Path):
         'WIFI_ADDR = "192.168.1.66:5555"',
         'WIFI_ADDR = os.environ.get("PHONEBOX_WIFI_ADB", "192.168.1.66:5555")')
 
+    # 3.5) daily_hub v2 CFG：仓库默认 adb 在 PATH 中、数据目录指向上级 data/
+    src = src.replace(
+        'str(BASE.parent / "flash-hermes" / "platform-tools" / "adb.exe")',
+        '"adb"')
+    src = src.replace(
+        'Path(_env("PHONEBOX_DATA_DIR", str(BASE)))',
+        'Path(_env("PHONEBOX_DATA_DIR", str(BASE.parent / "data")))')
+
+    # 3.6) manage.py：仓库数据目录指向上级 data/
+    src = src.replace(
+        'Path(os.environ.get("PHONEBOX_DATA_DIR", SCRIPTS))',
+        'Path(os.environ.get("PHONEBOX_DATA_DIR", SCRIPTS.parent / "data"))')
+
     # 4) 数据文件读取 → DATA_DIR
     for name in DATA_NAMES:
         src = src.replace(f'(BASE / "{name}")', f'(DATA_DIR / "{name}")')

@@ -42,12 +42,11 @@ OVERVIEW_HTML = """<style>
 <div class="wrap">
   <div class="head"><b>拙诚日课终端</b><span>· 五阶段 · 触屏切换</span></div>
   <div class="grid">
-    <button class="tile" data-go="rike"><span class="ic">💬</span><span class="nm">每日金句</span><span class="ds">大字金句 · 品读语境</span></button>
-    <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 微习惯 · 提醒</span></button>
-    <button class="tile" data-go="hub"><span class="ic">⏱️</span><span class="nm">定时中枢</span><span class="ds">心跳 · 日课提醒 · 轮播</span></button>
-    <button class="tile" data-go="companion"><span class="ic">📖</span><span class="nm">AI 伴读</span><span class="ds">解读 · 思考题</span></button>
+    <button class="tile" data-go="rike"><span class="ic">💬</span><span class="nm">每日金句</span><span class="ds">品读模式 · 暂停/上下句</span></button>
+    <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 两列勾选</span></button>
+    <button class="tile" data-go="hub"><span class="ic">⏱️</span><span class="nm">定时中枢</span><span class="ds">独立调度 · 断线退避</span></button>
+    <button class="tile" data-go="companion"><span class="ic">📖</span><span class="nm">AI 伴读</span><span class="ds">完整阅读 · 手动翻页</span></button>
     <button class="tile" data-go="ride"><span class="ic">🧘</span><span class="nm">静坐三省</span><span class="ds">呼吸引导 · 静坐计时</span></button>
-    <button class="tile" data-go="home"><span class="ic">🏠</span><span class="nm">系统主页</span><span class="ds">时钟 · 媒体 · 状态</span></button>
   </div>
 </div>
 <script>
@@ -68,7 +67,7 @@ HUB_HTML = """<style>
   .foot{font-size:clamp(10px,1.6vh,17px);color:#8a94a3}
 </style>
 <div class="wrap">
-  <div class="head"><b>定时中枢</b><span>电脑端 Python · 10 秒心跳</span></div>
+  <div class="head"><b>定时中枢</b><span>电脑端 Python · 独立任务调度</span></div>
   <div class="rows">
     <div class="row hl"><span class="k" id="kr">日课提醒</span><span class="v" id="r">等待推送…</span></div>
     <div class="row hl"><span class="k" id="km">今日微习惯</span><span class="v" id="h">等待推送…</span></div>
@@ -77,7 +76,7 @@ HUB_HTML = """<style>
     <div class="row"><span class="k" id="ks">环境感知</span><span class="v" id="s">等待推送…</span></div>
     <div class="row"><span class="k" id="ki">中枢心跳</span><span class="v" id="i">等待推送…</span></div>
   </div>
-  <div class="foot">金句 10s · 伴读 30s · 日课提醒 15min · 微习惯 60min · 硬件 90s · 离线照常轮播</div>
+  <div class="foot">心跳 30s · 金句组 3min · 伴读组 10min · 微习惯 60min · 提醒 15min · 断线退避重试</div>
 </div>
 <script>
   function item(k){var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};return p[k]&&p[k].data?p[k].data:null;}
@@ -235,25 +234,64 @@ def main():
         "options": {"html": XINGSHEN_HTML, "transparent": False},
     }])
 
-    # 4) 金句页：push 组件的 .pv 样式写死 nowrap+省略号，长文必截断；
-    #    改用 HTML 组件自动换行，字号用容器单位保持"大字"观感
+    # 4) 金句页：品读模式 —— 中枢每 3 分钟推一组（10 句），组内自由翻阅，
+    #    可暂停自动轮换；push 组件 nowrap 截断问题早已改 HTML 组件解决
     QUOTE_HTML = """<style>
-  .wrap{height:100%;box-sizing:border-box;padding:1.2vh 1.8vw;display:flex;flex-direction:column;justify-content:center;gap:1.2vh}
-  .t{font-size:clamp(11px,2vh,20px);color:#8a94a3;letter-spacing:.12em;text-transform:uppercase}
-  .v{font-size:min(13.5vh,7.6vw);line-height:1.4;color:#eef2f6;overflow-wrap:break-word;word-break:break-word;font-weight:400;transform:translateZ(0)}
-  .s{font-size:clamp(14px,3.2vh,30px);color:#8a94a3}
+  .wrap{height:100%;box-sizing:border-box;padding:1vh 1.8vw .8vh;display:flex;flex-direction:column;gap:.6vh}
+  .t{font-size:clamp(11px,2vh,20px);color:#8a94a3;letter-spacing:.12em;display:flex;justify-content:space-between;align-items:center}
+  .badge{font-size:clamp(10px,1.7vh,17px);color:#2dd4bf;letter-spacing:0;white-space:nowrap}
+  .v{flex:1;min-height:0;font-size:min(11.5vh,6.6vw);line-height:1.35;color:#eef2f6;overflow-wrap:break-word;word-break:break-word;font-weight:400;transform:translateZ(0);display:flex;align-items:center}
+  .s{font-size:clamp(13px,2.8vh,26px);color:#8a94a3;overflow-wrap:break-word;word-break:break-word}
+  .ctr{display:flex;gap:1vw;padding-top:.4vh}
+  .btn{flex:1;height:clamp(34px,5.5vh,52px);border-radius:10px;border:1px solid rgba(45,212,191,.4);background:rgba(45,212,191,.10);color:#2dd4bf;font-size:clamp(13px,2.3vh,22px);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+  .btn:active{background:rgba(45,212,191,.28)}
+  .btn.on{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.5);color:#f59e0b}
 </style>
-<div class="wrap"><div class="t">QUOTE · 每日金句</div><div class="v" id="qv">等待推送…</div><div class="s" id="qs"></div></div>
+<div class="wrap">
+  <div class="t"><span>QUOTE · 每日金句</span><span class="badge" id="qb">—</span></div>
+  <div class="v"><span id="qv">等待推送…</span></div>
+  <div class="s" id="qs"></div>
+  <div class="ctr">
+    <div class="btn" id="bPrev">‹ 上句</div>
+    <div class="btn" id="bPause">⏸ 暂停轮换</div>
+    <div class="btn" id="bNext">下句 ›</div>
+  </div>
+</div>
 <script>
+  var batch=null,bi=0,paused=false,bn=-1;
   function put(id,txt){var e=document.getElementById(id);if(e.textContent===txt)return;var n=e.cloneNode(false);n.textContent=txt;e.parentNode.replaceChild(n,e);}
-  function show(){var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};var d=p['daily-quote'];if(d&&d.data){put('qv',d.data.value||'—');put('qs',d.data.sub||'');}}
-  phonebox.on('push',show);show();
+  function render(){
+    if(!batch||!batch.items||!batch.items.length)return;
+    var L=batch.items.length;
+    bi=((bi%L)+L)%L;
+    var it=batch.items[bi];
+    put('qv',it.text||'—');
+    put('qs',(it.tag?'主题：'+it.tag+' · ':'')+(it.genre?it.genre+' · ':'')+it.source);
+    put('qb','组内 '+(bi+1)+'/'+L+(paused?' · 已暂停':''));
+  }
+  function grab(){
+    var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};
+    var d=p['quote-batch'];
+    if(d&&d.data&&d.data.batch_no!==bn){bn=d.data.batch_no;batch=d.data;bi=0;
+      if(!paused)render();else put('qb','新组已到 · 已暂停');return;}
+    if(!batch){var s=p['daily-quote'];if(s&&s.data){put('qv',s.data.value||'—');put('qs',s.data.sub||'');put('qb','单条模式');}}
+  }
+  document.getElementById('bPrev').addEventListener('click',function(){if(batch){bi--;render();}});
+  document.getElementById('bNext').addEventListener('click',function(){if(batch){bi++;render();}});
+  document.getElementById('bPause').addEventListener('click',function(){
+    paused=!paused;
+    var b=document.getElementById('bPause');
+    b.textContent=paused?'▶ 继续轮换':'⏸ 暂停轮换';
+    b.className=paused?'btn on':'btn';
+    render();
+  });
+  phonebox.on('push',grab);grab();
 </script>"""
     rike = next((p for p in pages if p.get("id") == "rike"), None)
     if rike:
-        # 去重：清掉 quote-main 和历次部署遗留的 quote-main-h / -h-2 / -h-3 …
+        # 去重：清掉历次部署遗留的所有 quote-* 组件（quote-main / quote-foot 及 -2/-3 后缀副本）
         rike["widgets"] = [w for w in rike["widgets"]
-                           if not str(w.get("id", "")).startswith("quote-main")]
+                           if not str(w.get("id", "")).startswith("quote")]
 
     # 金句页下半屏：品读语境（主题·出处 + 时辰宜事），替代原先的电量/亮度组件
     QUOTE_FOOT_HTML = """<style>

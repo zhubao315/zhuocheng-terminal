@@ -24,16 +24,6 @@ DATA_DIR = Path(os.environ.get(
     "PHONEBOX_DATA_DIR",
     Path(__file__).resolve().parent.parent / "data"))
 
-import os
-DATA_DIR = Path(os.environ.get(
-    "PHONEBOX_DATA_DIR",
-    Path(__file__).resolve().parent.parent / "data"))
-
-import os
-DATA_DIR = Path(os.environ.get(
-    "PHONEBOX_DATA_DIR",
-    Path(__file__).resolve().parent.parent / "data"))
-
 API = os.environ.get("PHONEBOX_API", "http://127.0.0.1:8765")
 PAGE_ID = "companion"
 KEYS = {"passage": "ai-passage", "insight": "ai-insight"}
@@ -92,30 +82,77 @@ def setup_page():
         pages.append(page)
         print(f"✓ 新建页面 {PAGE_ID}")
 
-    # push 组件 .pv 写死 nowrap+省略号，长原文会截断；改 HTML 组件自动换行
-    passage_html = """<style>
-  .wrap{height:100%;box-sizing:border-box;padding:1.2vh 1.8vw;display:flex;flex-direction:column;justify-content:center;gap:1vh}
-  .t{font-size:clamp(11px,2vh,20px);color:#8a94a3;letter-spacing:.12em;text-transform:uppercase}
-  .v{font-size:min(22vh,8vw);line-height:1.4;color:#eef2f6;overflow-wrap:break-word;word-break:break-word;transform:translateZ(0)}
-  .s{font-size:clamp(14px,3.2vh,30px);color:#8a94a3}
+    # 伴读页 v2：单屏阅读器 —— 原文/解读/一问同屏分层，中枢每 10 分钟推一组
+    # （5 条），组内自由翻阅、可暂停；不做自动轮换打断阅读
+    READER_HTML = """<style>
+  .wrap{height:100%;box-sizing:border-box;padding:1vh 1.8vw .8vh;display:flex;flex-direction:column;gap:.7vh}
+  .t{font-size:clamp(11px,2vh,20px);color:#8a94a3;letter-spacing:.12em;display:flex;justify-content:space-between;align-items:center}
+  .badge{font-size:clamp(10px,1.7vh,17px);color:#2dd4bf;letter-spacing:0;white-space:nowrap}
+  .pass{min-height:0;flex:0 1 auto;font-size:min(7.2vh,4.2vw);line-height:1.4;color:#eef2f6;overflow-wrap:break-word;word-break:break-word;transform:translateZ(0)}
+  .src{font-size:clamp(12px,2.2vh,21px);color:#8a94a3;overflow-wrap:break-word;word-break:break-word}
+  .div{height:1px;background:rgba(45,212,191,.25);flex:none}
+  .ins{flex:1;min-height:0;overflow:hidden;font-size:clamp(13px,2.5vh,23px);line-height:1.5;color:#b8c2cf;overflow-wrap:break-word;word-break:break-word;transform:translateZ(0)}
+  .q{flex:none;font-size:clamp(13px,2.5vh,23px);line-height:1.4;color:#f59e0b;overflow-wrap:break-word;word-break:break-word}
+  .ctr{display:flex;gap:1vw;padding-top:.4vh;flex:none}
+  .btn{flex:1;height:clamp(32px,5vh,48px);border-radius:10px;border:1px solid rgba(45,212,191,.4);background:rgba(45,212,191,.10);color:#2dd4bf;font-size:clamp(13px,2.2vh,21px);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+  .btn:active{background:rgba(45,212,191,.28)}
+  .btn.on{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.5);color:#f59e0b}
 </style>
-<div class="wrap"><div class="t">QUOTE · 今日伴读 · 原文</div><div class="v" id="pv">等待推送…</div><div class="s" id="ps"></div></div>
+<div class="wrap">
+  <div class="t"><span>伴读 · 原文</span><span class="badge" id="cb">—</span></div>
+  <div class="pass" id="cv">等待推送…</div>
+  <div class="src" id="cs"></div>
+  <div class="div"></div>
+  <div class="ins" id="ci">解读加载中…</div>
+  <div class="q" id="cq"></div>
+  <div class="ctr">
+    <div class="btn" id="bPrev">‹ 上一条</div>
+    <div class="btn" id="bPause">⏸ 暂停轮换</div>
+    <div class="btn" id="bNext">下一条 ›</div>
+  </div>
+</div>
 <script>
+  var batch=null,bi=0,paused=false,bn=-1;
   function put(id,txt){var e=document.getElementById(id);if(e.textContent===txt)return;var n=e.cloneNode(false);n.textContent=txt;e.parentNode.replaceChild(n,e);}
-  function show(){var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};var d=p['ai-passage'];if(d&&d.data){put('pv',d.data.value||'—');put('ps',d.data.sub||'');}}
-  phonebox.on('push',show);show();
+  function render(){
+    if(!batch||!batch.items||!batch.items.length)return;
+    var L=batch.items.length;
+    bi=((bi%L)+L)%L;
+    var it=batch.items[bi];
+    put('cv',it.passage||'—');
+    put('cs',it.source||'');
+    put('ci',it.insight||'');
+    put('cq',it.question?('❓ 今日一问：'+it.question+'　✍️ 关联日课：'+it.practice):'');
+    put('cb','组内 '+(bi+1)+'/'+L+' · #'+(it.tag||'')+(paused?' · 已暂停':''));
+  }
+  function grab(){
+    var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};
+    var d=p['companion-batch'];
+    if(d&&d.data&&d.data.batch_no!==bn){bn=d.data.batch_no;batch=d.data;bi=0;
+      if(!paused)render();else put('cb','新组已到 · 已暂停');return;}
+    if(!batch){var s=p['ai-passage'];if(s&&s.data){put('cv',s.data.value||'—');put('cs',s.data.sub||'');put('cb','单条模式');}}
+  }
+  document.getElementById('bPrev').addEventListener('click',function(){if(batch){bi--;render();}});
+  document.getElementById('bNext').addEventListener('click',function(){if(batch){bi++;render();}});
+  document.getElementById('bPause').addEventListener('click',function(){
+    paused=!paused;
+    var b=document.getElementById('bPause');
+    b.textContent=paused?'▶ 继续轮换':'⏸ 暂停轮换';
+    b.className=paused?'btn on':'btn';
+    render();
+  });
+  phonebox.on('push',grab);grab();
 </script>"""
     widgets = [
-        {"id": "ai-passage-w", "type": "html", "x": 0, "y": 0, "w": 12, "h": 2,
-         "options": {"html": passage_html, "transparent": False}},
-        {"id": "ai-insight-w", "type": "push", "x": 0, "y": 2, "w": 12, "h": 4,
-         "options": {"key": KEYS["insight"], "title": "AI 解读 + 今日一问", "style": "list"}},
+        {"id": "ai-reader-h", "type": "html", "x": 0, "y": 0, "w": 12, "h": 6,
+         "options": {"html": READER_HTML, "transparent": False}},
     ]
-    existing = {w.get("id"): w for w in page.get("widgets", [])}
-    existing.pop("ai-question-w", None)  # 问题已并入解读列表，移除旧组件
+    # 清理旧版组件（含历次部署遗留的 -h-2 / -h-3 … 后缀）
+    for legacy in ("ai-passage", "ai-insight", "ai-question", "ai-reader"):
+        page["widgets"] = [w for w in page.get("widgets", [])
+                           if not str(w.get("id", "")).startswith(legacy)]
     for w in widgets:
-        existing[w["id"]] = w
-    page["widgets"] = list(existing.values())
+        page["widgets"].append(w)
 
     request("PUT", "/api/settings", cfg)
     print("✓ 页面配置已写入")
