@@ -1,5 +1,21 @@
 # 更新日志
 
+## v1.4.2 (2026-11-24) · APK v2 签名（新系统兼容）
+
+- **问题**：新手机（Android 11+）安装报「解析软件包时出现问题(33) packageInfo is null」——
+  targetSdk 35 的应用按新系统强制要求必须携带 v2 签名，旧签名器只有 v1
+- **新增 `scripts/sign_apk_v2.py`**：纯 Python 实现 APK Signature Scheme v2（无需 Java/apktool）：
+  - v1(JAR) + v2 双签名，同一密钥；密钥持久化于 `.keys/`（已 gitignore），后续版本可覆盖升级
+  - 布局与 apksig 实测一致：EOCD 指向真实 CD，验证器从 CD 前 24 字节 footer 反向定位签名块
+  - 内容摘要：三段（条目区/完整CD/插入前EOCD）1MB 分块，块摘要 = SHA256(0xa5‖u32块长‖块)，
+    顶层 = SHA256(0x5a‖u32块数‖各块摘要)
+  - signer 结构：signedData(digests/certificates/additionalAttributes 各带长度前缀、
+    证书逐条带长度前缀) + signatures(逐记录带前缀) + publicKey(SPKI)
+  - 自带 `--verify` 自校验；真机验证通过（旧手机上仅因密钥不同拒绝覆盖安装，全新安装无碍）
+- **签名方法**：`python scripts/sign_apk_v2.py <unsigned.apk> <signed.apk>`
+
+## v1.4.1 (2026-11-24) · 发布资产与品牌统一
+
 ## v1.4.1 (2026-11-24) · 发布资产与品牌统一
 
 - **品牌命名三者统一**：产品「拙诚日课终端 · ZhuoCheng Terminal」/ 仓库 `zhuocheng-terminal` /
