@@ -1,5 +1,20 @@
 # 更新日志
 
+## v1.3.0 (2026-11-24)
+
+### 专属应用形态
+- **页面精简**：移除 PhoneBox 自带的 Home/AI/Work/System/Processes/Shortcuts/Music/Focus/World
+  等页面，仅保留拙诚日课六页，总览置顶；应用冷启动默认显示总览
+- **应用图标**：换为「拙诚」图标——深墨圆底 #0f1318 + 青色「拙」字 #2dd4bf + 金色打卡点
+  #f59e0b；`tools/build_zhuocheng_apk.py` 一键完成改名+换图标
+- 图标替换原理（见 `tools/find_icon.py`）：AndroidManifest `android:icon/roundIcon`
+  资源 ID → resources.arsc 反查文件路径；自适应图标 BW.xml 前景 ic_launcher_fg
+  与 legacy anydpi 配置的 Res_value **原地 4 字节改写**指向 res/J5.png，
+  再替换 J5.png（432px 透明字形）与 5 张 tile/通知 PNG 字节
+- res/ 目录资源名被混淆（HM.png 等短名），只能按 arsc 反查定位
+- 构建链：`build_zhuocheng_apk.py`（改名+图标）→ `sign_apk.py`（v1 签名）
+  → 卸载重装 + root 恢复 shared_prefs 免重新配对
+
 ## v1.2.0 (2026-11-24)
 
 ### 新栏目 · 静坐三省（替代骑行模式）
