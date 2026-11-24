@@ -1,12 +1,32 @@
 # 拙诚日课终端 · ZhuoCheng Terminal
 
-> 把一台 2015 年的旧安卓手机，改造成床头「日课修行终端」：
+> **A Personal System for Daily Cultivation** — 以拙诚立身，以日课修心。
+> 把一部旧手机，变成一张常亮的修身桌面。
 > 每日金句 10 秒轮换 · AI 伴读 30 秒轮换 · 曾国藩日课十二条触屏打卡 · 微习惯每小时轮换 · 硬件感知中枢。
 >
 > 硬件原型：红米 Note 2（hermes / MT6795，刷入 LineageOS 16）+ [PhoneBox](https://ersinkoc.github.io/phonebox/) 面板。
 > 无需任何 API key、无需联网抓取——全部 999 条伴读解读在构建期预生成。
 
-![status](https://img.shields.io/badge/quotes-999-blue) ![status](https://img.shields.io/badge/companions-999-purple) ![license](https://img.shields.io/badge/code%20license-MIT-green)
+![status](https://img.shields.io/badge/quotes-999-blue) ![status](https://img.shields.io/badge/companions-999-purple) ![status](https://img.shields.io/badge/microhabits-30-teal) ![license](https://img.shields.io/badge/code%20license-MIT-green)
+
+**在线落地页（GitHub Pages）**：<https://zhubao315.github.io/zhuocheng-terminal/> · **浏览器演示**：<https://zhubao315.github.io/zhuocheng-terminal/preview.html>
+
+## 命名与发布规范（三者统一）
+
+| 项目 | 内容 |
+|---|---|
+| 产品品牌名 | 拙诚日课终端 · ZhuoCheng Terminal |
+| GitHub 仓库 | `zhuocheng-terminal` |
+| GitHub Pages | `https://zhubao315.github.io/zhuocheng-terminal/`（部署自 `docs/` 目录） |
+| Website Title | 拙诚日课终端 · ZhuoCheng Terminal |
+| Description | 把旧手机变成一张常亮的修身桌面。离线金句、AI伴读、曾国藩日课与微习惯终端。 |
+| Topics | `zhuocheng` `daily-cultivation` `offline-first` `phonebox` `digital-wellbeing` `python` |
+| License | MIT（代码）；数据许可另行明确（见下方版权声明） |
+| Demo | `/zhuocheng-terminal/preview.html` |
+
+> 品牌扩展空间：ZhuoCheng Wisdom（智慧库）、ZhuoCheng Ritual（日课系统）、ZhuoCheng Archive（成长档案）。
+> 暂不定名 `zhuocheng-os`——目前核心仍是一个轻量级终端，避免过早扩大产品定位。
+
 
 ## 它是什么
 
@@ -17,7 +37,7 @@
 | 每日金句 | 每 10 秒随机换（不与上一条重复） | 999 条金句，43 个来源 |
 | AI 伴读 | 每 30 秒随机换 | 999 条自包含条目：原文 + 解读 + 今日一问 + 关联日课 |
 | 日课打卡 | 触屏勾选，每日自动重置 | 曾国藩日课十二条，双列清单 |
-| 微习惯 | 每小时随机换 | 14 条 2 分钟可完成的微习惯，映射日课 |
+| 微习惯 | 每小时随机换 | 30 条 2 分钟可完成的微习惯，映射日课 |
 | 定时中枢 | 10 秒心跳 | 运行时长/推送计数/连接方式/轮换进度/下次采集倒计时 + 电量、环境光等硬件采集 |
 
 设计哲学来自「拙诚」：**结硬寨，打呆仗**——用笨功夫把一套系统搭起来，然后等待复利。
@@ -84,7 +104,7 @@ python daily_hub.py once      # 推一轮（测试）
 
 - [`data/quotes.json`](data/quotes.json) — **999 条金句**，43 个来源，文本零重复，平均 15.8 字
 - [`data/companion.json`](data/companion.json) — **999 条 AI 伴读**（原文 + 解读 + 思考题 + 关联日课 + 主题标签）
-- [`data/microhabits.json`](data/microhabits.json) — 14 条微习惯
+- [`data/microhabits.json`](data/microhabits.json) — 30 条微习惯
 - [`data/rike_items.json`](data/rike_items.json) — 日课十二条清单
 
 ### 来源分布（TOP）
@@ -130,9 +150,19 @@ zhuocheng-terminal/
 │   ├── validate_corpus.py # 全量校验器
 │   └── portable_patch.py  # 脚本可移植化补丁（开发用）
 ├── corpus_sources/        # 公版摘句源文件 + 原创金句池
-├── docs/                  # 架构说明 / PhoneBox 踩坑指南 / 安装指南
-└── web/preview.html       # 浏览器演示页
+├── docs/                  # GitHub Pages 站点根（落地页 + 演示）+ 项目文档
+│   ├── index.html         # 落地页（产品介绍一页通）
+│   ├── preview.html       # 浏览器演示页（Pages 版，数据在 docs/data/）
+│   └── 01~06-*.md         # 架构 / 踩坑 / 安装 / 审计 / 路线图 / 配置
+├── web/preview.html       # 浏览器演示页（仓库版，读 ../data/）
+└── LICENSE                # MIT
 ```
+
+### GitHub Pages 部署
+
+1. 推送到 GitHub 后，进入仓库 **Settings → Pages**
+2. Source 选择 **Deploy from a branch**，Branch 选 `main`，目录选 **`/docs`**
+3. 保存后约 1 分钟生效：落地页 `https://zhubao315.github.io/zhuocheng-terminal/`，演示页同路径下 `preview.html`
 
 ## 文档
 

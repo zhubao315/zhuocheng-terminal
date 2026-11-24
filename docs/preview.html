@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拙诚日课终端 · 浏览器演示</title>
+<style>
+  :root {
+    --bg: #0e1116; --card: #171c24; --card2: #1d242f; --line: #2a3342;
+    --txt: #eef2f6; --sub: #8a94a3; --amber: #f5b45e; --teal: #5ec8b4; --dim: #5b6676;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh; padding: 28px 20px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+  h1 { font-size: 22px; letter-spacing: .05em; }
+  .meta { color: var(--sub); font-size: 13px; }
+  .meta b { color: var(--teal); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; min-height: 250px;
+  }
+  .card.wide { grid-column: 1 / -1; min-height: 0; }
+  .label { font-size: 11px; letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  .quote { font-size: 26px; line-height: 1.55; font-weight: 600; overflow-wrap: break-word; }
+  .src { color: var(--sub); font-size: 14px; }
+  .bar { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--teal); width: 0%; transition: width .3s linear; }
+  .bar.amber i { background: var(--amber); }
+  .row { display: flex; justify-content: space-between; align-items: center; }
+  .timer { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .passage { font-size: 20px; line-height: 1.6; font-weight: 600; }
+  .insight { font-size: 14px; line-height: 1.8; color: #c3cbd6; }
+  .chip {
+    display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 20px;
+    background: rgba(245,180,94,.12); color: var(--amber); width: fit-content;
+  }
+  .question { font-size: 14px; color: var(--teal); line-height: 1.6; }
+  .practice { font-size: 12px; color: var(--sub); }
+  button {
+    background: var(--card2); color: var(--txt); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 16px; font-size: 13px; cursor: pointer;
+  }
+  button:hover { border-color: var(--teal); color: var(--teal); }
+  .tools { display: flex; gap: 10px; margin-top: 4px; }
+  footer { margin-top: 26px; color: var(--dim); font-size: 12px; line-height: 1.8; }
+  footer a { color: var(--sub); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>拙诚日课终端</h1>
+    <span class="meta">浏览器演示 · 金句 <b id="qcount">…</b> 条 / 伴读 <b id="ccount">…</b> 条 ·
+      金句 10 秒 · 伴读 30 秒</span>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <span class="label">每日金句 · 10s 轮换</span><span class="timer" id="qt">10s</span>
+      </div>
+      <div class="bar"><i id="qbar"></i></div>
+      <div class="quote" id="quote">加载中…</div>
+      <div class="src" id="qsrc"></div>
+      <div class="tools"><button id="qnext">换一条 ⚡</button><button id="qpause">暂停</button></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span class="label">AI 伴读 · 30s 轮换</span><span class="timer" id="ct">30s</span>
+      </div>
+      <div class="bar amber"><i id="cbar"></i></div>
+      <div class="passage" id="cpassage">加载中…</div>
+      <div class="insight" id="cinsight"></div>
+      <div class="question" id="cquestion"></div>
+      <div class="practice" id="cpractice"></div>
+      <div class="tools"><button id="cnext">换一条 ⚡</button><button id="cpause">暂停</button></div>
+    </div>
+
+    <div class="card wide">
+      <div class="row"><span class="label">日课十二条（演示）</span><span class="meta" id="qmeta"></span></div>
+      <div class="insight" style="margin-top:6px">
+        主敬 · 整齐严肃，心不散乱　｜　静坐 · 每日四刻，体验来复　｜　早起 · 黎明即起，醒后勿恋　｜
+        读书不二 · 一书未完不看他书　｜　读史 · 每日圈点十叶　｜　谨言 · 刻刻留心，第一工夫　｜
+        养气 · 气藏丹田，无不可对人言　｜　保身 · 节劳、节欲、节饮食　｜　日知所亡 · 记录当日心得　｜
+        月无忘所能 · 每月作诗文数首　｜　作字 · 早饭后临帖半小时　｜　夜不出门 · 戒旷功疲神
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    真机运行时由电脑中枢（daily_hub.py）通过 PhoneBox 推送到旧手机面板；
+    本页为数据同源演示。来源标注即版权声明：公版经典保留原文，现代著作仅作「主题转写」。
+    <br>数据：<a href="data/quotes.json">data/quotes.json</a> ·
+    <a href="data/companion.json">data/companion.json</a>
+  </footer>
+</div>
+
+<script>
+  // fetch 失败（file:// 直开）时回退到内置样例
+  const FALLBACK = {
+    quotes: [
+      {text:"应无所住而生其心。", source:"金刚经", tag:"空性"},
+      {text:"结硬寨，打呆仗。", source:"曾国藩", tag:"拙诚"},
+      {text:"物来顺应，未来不迎，当时不杂，既过不恋。", source:"曾国藩", tag:"当下"},
+      {text:"知人者智，自知者明。", source:"老子《道德经》", tag:"自知"},
+      {text:"生如夏花之绚烂，死如秋叶之静美。", source:"泰戈尔《飞鸟集》", tag:"无常"}
+    ],
+    companions: [
+      {passage:"结硬寨，打呆仗。", source:"曾国藩", tag:"拙诚", practice:"读书不二",
+       insight:"不取巧、不投机，先立于不败之地。用笨功夫搭建系统优势，然后等待复利。看似最慢，往往最快。",
+       question:"你的「硬寨」是什么？今天有没有加固一寸？"}
+    ]
+  };
+
+  let quotes = FALLBACK.quotes, companions = FALLBACK.companions;
+  let qi = -1, ci = -1, lastQ = -1, lastC = -1;
+  let qPaused = false, cPaused = false;
+  const Q_SEC = 10, C_SEC = 30;
+
+  const $ = id => document.getElementById(id);
+  const rnd = (n, not) => { if (n <= 1) return 0; let p = [...Array(n).keys()].filter(i => i !== not); return p[Math.floor(Math.random() * p.length)]; };
+
+  function pick(list, kind) {
+    if (kind === 'q') { lastQ = qi = rnd(list.length, qi); return list[qi]; }
+    lastC = ci = rnd(list.length, ci); return list[ci];
+  }
+
+  function showQuote() {
+    const q = pick(quotes, 'q');
+    $('quote').textContent = q.text;
+    $('qsrc').textContent = `—— ${q.source} · #${q.tag}`;
+  }
+  function showCompanion() {
+    const c = pick(companions, 'c');
+    $('cpassage').textContent = c.passage;
+    $('cinsight').textContent = c.insight;
+    $('cquestion').textContent = `❓ ${c.question}`;
+    $('cpractice').textContent = `关联日课：${c.practice} · 来源：${c.source}`;
+  }
+
+  let qLeft = Q_SEC, cLeft = C_SEC;
+  setInterval(() => {
+    if (!qPaused && quotes.length) {
+      qLeft--; if (qLeft <= 0) { showQuote(); qLeft = Q_SEC; }
+      $('qt').textContent = qLeft + 's';
+      $('qbar').style.width = ((Q_SEC - qLeft) / Q_SEC * 100) + '%';
+    }
+    if (!cPaused && companions.length) {
+      cLeft--; if (cLeft <= 0) { showCompanion(); cLeft = C_SEC; }
+      $('ct').textContent = cLeft + 's';
+      $('cbar').style.width = ((C_SEC - cLeft) / C_SEC * 100) + '%';
+    }
+  }, 1000);
+
+  $('qnext').onclick = () => { showQuote(); qLeft = Q_SEC; };
+  $('cnext').onclick = () => { showCompanion(); cLeft = C_SEC; };
+  $('qpause').onclick = e => { qPaused = !qPaused; e.target.textContent = qPaused ? '继续' : '暂停'; };
+  $('cpause').onclick = e => { cPaused = !cPaused; e.target.textContent = cPaused ? '继续' : '暂停'; };
+
+  (async () => {
+    // 路径探测：GitHub Pages（docs/ 为站点根）优先 data/，本地仓库回退 ../data/
+    async function loadJson(paths) {
+      for (const p of paths) {
+        try { const r = await fetch(p); if (r.ok) return await r.json(); } catch (e) { /* next */ }
+      }
+      throw new Error('all paths failed');
+    }
+    try {
+      const [rq, rc] = await Promise.all([
+        loadJson(['data/quotes.json', '../data/quotes.json']),
+        loadJson(['data/companion.json', '../data/companion.json'])
+      ]);
+      if (rq.items?.length) quotes = rq.items;
+      if (rc.items?.length) companions = rc.items;
+      $('qmeta').textContent = '数据加载成功 · 与手机面板同源';
+    } catch (e) {
+      $('qmeta').textContent = 'fetch 失败（file:// 直开），使用内置样例；经 http 访问可加载完整 999+999';
+    }
+    $('qcount').textContent = quotes.length;
+    $('ccount').textContent = companions.length;
+    showQuote(); showCompanion();
+  })();
+</script>
+</body>
+</html>

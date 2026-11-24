@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拙诚日课终端 · ZhuoCheng Terminal</title>
+<meta name="description" content="把旧手机变成一张常亮的修身桌面。离线金句、AI伴读、曾国藩日课与微习惯终端。OFFLINE FIRST · ZERO API KEY。">
+<style>
+  :root {
+    --bg: #0e1116; --bg2: #10141b; --card: #171c24; --card2: #1d242f; --line: #2a3342;
+    --txt: #eef2f6; --sub: #8a94a3; --dim: #5b6676;
+    --amber: #f5b45e; --teal: #5ec8b4; --ink: #e8d9b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+  }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- nav ---- */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(14,17,22,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 18px; height: 52px; flex-wrap: nowrap; overflow-x: auto; }
+  nav .brand { color: var(--txt); font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
+  nav .brand b { color: var(--amber); }
+  nav a.sec { color: var(--sub); font-size: 13px; white-space: nowrap; }
+  nav a.sec:hover { color: var(--teal); text-decoration: none; }
+  nav .gh { margin-left: auto; white-space: nowrap; font-size: 13px; }
+
+  /* ---- hero ---- */
+  header { padding: 88px 0 60px; text-align: center; }
+  .kicker {
+    font-size: 12px; letter-spacing: .42em; color: var(--dim);
+    text-transform: uppercase; margin-bottom: 22px;
+  }
+  h1 { font-size: 44px; letter-spacing: .1em; font-weight: 800; }
+  h1 .en { display: block; margin-top: 10px; font-size: 15px; font-weight: 400; letter-spacing: .34em; color: var(--sub); text-transform: uppercase; }
+  .slogan { margin-top: 34px; font-size: 26px; color: var(--ink); letter-spacing: .12em; font-weight: 600; }
+  .subtitle { margin-top: 14px; font-size: 16px; color: var(--sub); }
+  .badges { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; letter-spacing: .14em; padding: 6px 16px; border-radius: 20px;
+    border: 1px solid var(--line); color: var(--sub); background: var(--card);
+  }
+  .badge.hot { color: var(--amber); border-color: rgba(245,180,94,.4); }
+  .stats { margin-top: 44px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px 12px 16px;
+  }
+  .stat .n { font-size: 32px; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .stat .t { margin-top: 4px; font-size: 13px; color: var(--sub); }
+  @media (max-width: 640px) { h1 { font-size: 32px; } .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---- sections ---- */
+  section { padding: 64px 0 8px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 26px; }
+  .sec-no { font-size: 13px; letter-spacing: .2em; color: var(--amber); font-weight: 700; }
+  h2 { font-size: 24px; letter-spacing: .06em; }
+  p.lead { color: #c3cbd6; max-width: 720px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 24px 26px; margin-top: 16px;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .grid2 .card { margin-top: 0; }
+  .card h3 { font-size: 17px; margin-bottom: 8px; color: var(--ink); }
+  .card p, .card li { color: #b9c2ce; font-size: 14.5px; }
+  .card ul { padding-left: 20px; }
+  .tag { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 20px; background: rgba(94,200,180,.12); color: var(--teal); margin-right: 6px; }
+
+  /* philosophy */
+  .motto {
+    display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .motto .card { flex: 1; min-width: 240px; margin-top: 0; }
+  .motto .zh { font-size: 20px; font-weight: 700; color: var(--amber); letter-spacing: .08em; }
+  .motto .en { font-size: 12px; color: var(--dim); letter-spacing: .12em; margin-top: 2px; }
+
+  /* demo */
+  .phone-frame {
+    margin: 24px auto 0; max-width: 420px;
+    border: 1px solid var(--line); border-radius: 22px; overflow: hidden;
+    background: var(--bg2); box-shadow: 0 18px 50px rgba(0,0,0,.5);
+  }
+  .phone-frame .notch { height: 22px; display: flex; justify-content: center; align-items: center; }
+  .phone-frame .notch i { width: 90px; height: 6px; border-radius: 3px; background: var(--line); display: block; }
+  .phone-frame iframe { width: 100%; height: 560px; border: 0; background: var(--bg); }
+  .demo-note { text-align: center; color: var(--dim); font-size: 13px; margin-top: 12px; }
+
+  /* feature table */
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 11px 14px; text-align: left; vertical-align: top; }
+  th { background: var(--card2); color: var(--ink); font-weight: 600; }
+  td { color: #b9c2ce; }
+  td b { color: var(--txt); }
+  .scroll-x { overflow-x: auto; }
+
+  /* arch */
+  pre {
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; overflow-x: auto; margin-top: 16px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 13px; line-height: 1.7; color: #a8b3c1;
+  }
+  pre .c { color: var(--dim); }
+  code.inline {
+    background: var(--card2); border-radius: 6px; padding: 1px 7px;
+    font-size: 13px; color: var(--amber);
+  }
+
+  /* steps */
+  .step { display: flex; gap: 16px; margin-top: 16px; align-items: flex-start; }
+  .step .no {
+    flex: 0 0 34px; height: 34px; border-radius: 50%;
+    background: rgba(245,180,94,.12); color: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; border: 1px solid rgba(245,180,94,.35);
+  }
+  .step .body { flex: 1; min-width: 0; }
+  .step h3 { font-size: 16px; margin-bottom: 6px; color: var(--ink); }
+
+  /* docs */
+  .doc-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  @media (max-width: 760px) { .doc-list { grid-template-columns: 1fr; } }
+  .doc-list .card { margin-top: 0; padding: 18px 20px; }
+  .doc-list .card b { color: var(--txt); }
+  .doc-list .card span { display: block; color: var(--sub); font-size: 13px; margin-top: 4px; }
+
+  footer {
+    margin-top: 80px; padding: 40px 0 56px; border-top: 1px solid var(--line);
+    text-align: center; color: var(--dim); font-size: 13px; line-height: 2;
+  }
+  footer .m { color: var(--amber); letter-spacing: .3em; font-size: 15px; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand">拙诚日课终端 <b>·</b> ZhuoCheng Terminal</span>
+    <a class="sec" href="#philosophy">理念</a>
+    <a class="sec" href="#demo">展示</a>
+    <a class="sec" href="#features">功能</a>
+    <a class="sec" href="#corpus">语料库</a>
+    <a class="sec" href="#arch">架构</a>
+    <a class="sec" href="#hardware">硬件</a>
+    <a class="sec" href="#install">安装</a>
+    <a class="sec" href="#docs">文档</a>
+    <a class="gh" href="https://github.com/zhubao315/zhuocheng-terminal" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="wrap">
+  <div class="kicker">ZHUOCHENG TERMINAL</div>
+  <h1>拙诚日课终端<span class="en">A Personal System for Daily Cultivation</span></h1>
+  <div class="slogan">以拙诚立身，以日课修心。</div>
+  <div class="subtitle">把一部旧手机，变成一张常亮的修身桌面。</div>
+  <div class="badges">
+    <span class="badge hot">OFFLINE FIRST</span>
+    <span class="badge hot">ZERO API KEY</span>
+    <span class="badge">PYTHON 3.8+</span>
+    <span class="badge">PHONEBOX</span>
+    <span class="badge">MIT LICENSE</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n">999</div><div class="t">每日金句 · 10s 轮换</div></div>
+    <div class="stat"><div class="n">999</div><div class="t">AI 伴读 · 30s 轮换</div></div>
+    <div class="stat"><div class="n">12</div><div class="t">曾国藩日课 · 触屏打卡</div></div>
+    <div class="stat"><div class="n">30</div><div class="t">微习惯 · 每小时轮换</div></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ================= 01 理念 ================= -->
+<section id="philosophy">
+  <div class="sec-head"><span class="sec-no">01</span><h2>产品理念</h2></div>
+  <p class="lead">「拙诚」是一种笨拙而真诚的功夫观：不取巧、不走捷径，用日复一日的固定动作积累复利。拙诚日课终端把这套哲学装进一部退役手机——它不追求智能，只追求<strong>常亮、在场、低干扰</strong>：床头一张安静发光的桌子，抬头即是今日的金句、日课与微习惯。</p>
+  <div class="motto">
+    <div class="card">
+      <div class="zh">结硬寨</div>
+      <div class="en">BUILD SOLID CAMPS</div>
+      <p>调度解耦、变更推送、每日记录持久化——工程上先立住不倒，才谈得上修行。</p>
+    </div>
+    <div class="card">
+      <div class="zh">打呆仗</div>
+      <div class="en">FIGHT DULL BATTLES</div>
+      <p>999 + 999 条语料在构建期预生成，离线可用、无需任何 API key，可复现、可校验。</p>
+    </div>
+    <div class="card">
+      <div class="zh">日日精进</div>
+      <div class="en">DAILY IMPROVEMENT</div>
+      <p>金句 10 秒、伴读 30 秒、微习惯每小时——让正确的信息在正确的时辰出现。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 展示 ================= -->
+<section id="demo">
+  <div class="sec-head"><span class="sec-no">02</span><h2>终端展示</h2></div>
+  <p class="lead">下方是<strong>可交互的真实演示</strong>（非截图）：金句与 AI 伴读按真实节奏轮换，数据来自本仓库语料库。点开试试「暂停 / 上句 / 下句」。</p>
+  <div class="phone-frame">
+    <div class="notch"><i></i></div>
+    <iframe src="preview.html" title="拙诚日课终端浏览器演示" loading="lazy"></iframe>
+  </div>
+  <p class="demo-note">也可以 <a href="preview.html" target="_blank" rel="noopener">在新窗口全屏打开演示 ↗</a></p>
+</section>
+
+<!-- ================= 03 核心功能 ================= -->
+<section id="features">
+  <div class="sec-head"><span class="sec-no">03</span><h2>核心功能</h2></div>
+  <div class="scroll-x">
+  <table>
+    <tr><th>模块</th><th>节奏</th><th>说明</th></tr>
+    <tr><td><b>每日金句</b></td><td>10 秒随机换（不与上一条重复）</td><td>999 条、30+ 来源；品读模式展示主题出处 + 时辰宜事，支持暂停 / 上句 / 下句</td></tr>
+    <tr><td><b>AI 伴读</b></td><td>30 秒随机换</td><td>999 条自包含条目：原文 + 解读 + 今日一问 + 关联日课；单屏分层阅读器</td></tr>
+    <tr><td><b>日课打卡</b></td><td>触屏勾选，每日自动重置</td><td>曾国藩日课十二条，双列清单；15 分钟轮换修行提醒</td></tr>
+    <tr><td><b>微习惯</b></td><td>每小时随机换</td><td>30 条 2 分钟可完成的微习惯，逐条映射日课条目</td></tr>
+    <tr><td><b>定时中枢</b></td><td>30 秒心跳</td><td>六任务解耦调度、内容哈希变更推送、指数退避；电量与环境光等硬件采集</td></tr>
+    <tr><td><b>成长档案</b></td><td>按日持久化</td><td><code class="inline">records/YYYY-MM-DD.json</code> 记录每日推送与打卡轨迹（带容量限流）</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ================= 04 语料库 ================= -->
+<section id="corpus">
+  <div class="sec-head"><span class="sec-no">04</span><h2>语料库</h2></div>
+  <p class="lead">语料库是本项目最有价值的部分：全部离线、来源真实、构建可复现（固定随机种子），并配有全量校验器（数量 / 重复 / schema / 版权白名单）。</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>每日金句 × 999</h3>
+      <p>30+ 来源：拙诚日课原创 220 条，老子《道德经》88 条，孔子《论语》82 条，《金刚经》63 条，曾国藩 57 条，《增广贤文》《飞鸟集》《菜根谭》《传习录》……文本零重复，平均 15.8 字。</p>
+    </div>
+    <div class="card">
+      <h3>AI 伴读 × 999</h3>
+      <p>每条自包含：原文 + 解读 + 今日一问 + 关联日课 + 主题标签。解读由构建器按主题族语池预生成，不依赖网络与密钥。</p>
+    </div>
+    <div class="card">
+      <h3>微习惯 × 30 · 日课 × 12</h3>
+      <p>30 条 2 分钟微习惯逐条映射日课十二条；另附 12 条日课提醒语，每 15 分钟轮换推送。</p>
+    </div>
+    <div class="card">
+      <h3>版权与合规</h3>
+      <p>公版经典保留原文；现代著作（冥想、人类简史、生死疲劳等）<b>只做主题转写、不收录原文引文</b>，并如实标注「拙诚日课 · 转写」。校验脚本内置来源白名单。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 架构 ================= -->
+<section id="arch">
+  <div class="sec-head"><span class="sec-no">05</span><h2>技术架构</h2></div>
+  <p class="lead">一部手机 + 一台常驻电脑（树莓派 / NAS / 旧笔记本均可）。电脑上的 Python 中枢负责轮换与调度，经 PhoneBox 本地 API 推送到手机面板；全程局域网内完成。</p>
+<pre>
+<span class="c"># 六任务解耦调度（间隔全部可用环境变量调整）</span>
+heartbeat   30s   → hub-info     心跳 / 运行状态
+quotes     180s   → daily-quote  金句组 × 10 句（品读模式）
+companion  600s   → ai-passage   伴读组 × 5 条（单屏阅读器）
+microhabit 3600s  → micro-habit  微习惯轮换
+hardware    120s  → phone-batt   电量 / 环境光（WiFi adb）
+reminder    900s  → rike-reminder 日课提醒轮换
+
+<span class="c"># 工程化</span>
+内容哈希 → 只推变化 · 指数退避 · 单实例锁 · 日志轮转
+records/YYYY-MM-DD.json 每日档案 · CLI（once / dry-run / check / doctor）
+19 个单元测试 · manage.py 一键启停 / 备份 / 安装
+</pre>
+  <div class="card">
+    <h3>推送键约定</h3>
+    <p><span class="tag">daily-quote</span><span class="tag">ai-passage</span><span class="tag">ai-insight</span><span class="tag">micro-habit</span><span class="tag">hub-info</span><span class="tag">quote-meta</span><span class="tag">rike-reminder</span><span class="tag">phone-batt</span><span class="tag">phone-sensor</span></p>
+    <p style="margin-top:10px">全部通过 PhoneBox 本地 API（<code class="inline">/api/push/&lt;key&gt;</code>）推送，手机端无需任何额外服务。</p>
+  </div>
+</section>
+
+<!-- ================= 06 硬件 ================= -->
+<section id="hardware">
+  <div class="sec-head"><span class="sec-no">06</span><h2>硬件改造</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>原型机：红米 Note 2（2015）</h3>
+      <p>MT6795 · 1080×1920 · 刷入 LineageOS 16（Android 9）· 可 root。一部十年前的手机，屏幕素质至今足够做床头桌面——这正是本项目的寓意：<b>物尽其用，也是一种拙诚。</b></p>
+    </div>
+    <div class="card">
+      <h3>PhoneBox 面板</h3>
+      <p><a href="https://ersinkoc.github.io/phonebox/" target="_blank" rel="noopener">PhoneBox</a> 是让旧手机变成信息面板的出色开源项目。本仓库提供了完整的 APK 改名 / 换图标工具链（纯 Python 二进制补丁，无需 apktool），产出「拙诚日课」独立应用。</p>
+    </div>
+    <div class="card">
+      <h3>常亮与免打扰</h3>
+      <p>开发者选项保持唤醒 + 关闭自动锁屏；WebView 黄条去除方案、APK 重签名流程均已整理进踩坑指南。</p>
+    </div>
+    <div class="card">
+      <h3>不止于红米</h3>
+      <p>任何能跑 Android 5+ 并安装 PhoneBox 的设备都可用：旧手机、旧平板皆宜。没有 Wifi adb 也可只跑基础推送。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 07 安装 ================= -->
+<section id="install">
+  <div class="sec-head"><span class="sec-no">07</span><h2>快速安装</h2></div>
+  <div class="step">
+    <div class="no">1</div>
+    <div class="body">
+      <h3>克隆仓库</h3>
+<pre>git clone https://github.com/zhubao315/zhuocheng-terminal.git
+cd zhuocheng-terminal</pre>
+    </div>
+  </div>
+  <div class="step">
+    <div class="no">2</div>
+    <div class="body">
+      <h3>部署面板页面（需先在手机安装 PhoneBox 并配对）</h3>
+<pre>cd scripts
+python setup_overview.py      <span class="c"># 总览页 + 六个页面组件一键部署</span></pre>
+    </div>
+  </div>
+  <div class="step">
+    <div class="no">3</div>
+    <div class="body">
+      <h3>启动中枢</h3>
+<pre>python daily_hub.py           <span class="c"># 常驻心跳（默认）</span>
+python daily_hub.py doctor    <span class="c"># 环境自检</span>
+python manage.py start        <span class="c"># 或用管理器后台运行</span></pre>
+      <p>更多选项见 <a href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/03-install.md" target="_blank" rel="noopener">安装指南</a> 与 <a href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/06-configuration.md" target="_blank" rel="noopener">配置手册</a>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 08 文档 ================= -->
+<section id="docs">
+  <div class="sec-head"><span class="sec-no">08</span><h2>文档与开源许可</h2></div>
+  <div class="doc-list">
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/01-architecture.md" target="_blank" rel="noopener"><b>01 · 架构说明</b><span>五阶段架构与推送键约定</span></a>
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/02-phonebox-pitfalls.md" target="_blank" rel="noopener"><b>02 · PhoneBox 踩坑指南</b><span>独立 iframe、重复 id 重影、长文本截断、APK 重签名……血泪经验</span></a>
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/03-install.md" target="_blank" rel="noopener"><b>03 · 安装指南</b><span>旧手机刷机与部署全流程</span></a>
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/04-audit-report.md" target="_blank" rel="noopener"><b>04 · 审计报告</b><span>v1.1 稳定性审计结论</span></a>
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/05-improvement-roadmap.md" target="_blank" rel="noopener"><b>05 · 路线图</b><span>V1.1 → V2.0 演进计划</span></a>
+    <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/06-configuration.md" target="_blank" rel="noopener"><b>06 · 配置手册</b><span>全部环境变量与轮换节奏</span></a>
+  </div>
+  <div class="card">
+    <h3>许可</h3>
+    <p><b>代码：MIT License。</b>数据：公版原文进入公有领域；「拙诚日课 · 原创 / 转写」条目与解读随仓库许可同步发布。请保留来源标注，勿将转写条目冒充原书引文。</p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="m">结硬寨 · 打呆仗 · 日日精进</div>
+  <div>拙诚日课终端 · ZhuoCheng Terminal — A Personal System for Daily Cultivation</div>
+  <div>Code &amp; corpus under MIT · Powered by <a href="https://ersinkoc.github.io/phonebox/" target="_blank" rel="noopener">PhoneBox</a></div>
+</footer>
+
+</body>
+</html>

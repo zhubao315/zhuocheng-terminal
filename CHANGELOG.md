@@ -1,5 +1,15 @@
 # 更新日志
 
+## v1.4.1 (2026-11-24) · 发布资产与品牌统一
+
+- **品牌命名三者统一**：产品「拙诚日课终端 · ZhuoCheng Terminal」/ 仓库 `zhuocheng-terminal` /
+  Pages `https://zhubao315.github.io/zhuocheng-terminal/`；README 增补命名与发布规范表
+- **GitHub Pages 落地页**：新增 `docs/index.html`（hero 主张 + OFFLINE FIRST · ZERO API KEY 徽标
+  + 999/999/12/30 数据带 + 01 产品理念 → 08 文档许可 八章节），部署自 `/docs` 目录
+- **Pages 演示页**：`docs/preview.html` 独立适配 Pages 路径（data/ 优先、../data/ 回退、
+  file:// 内置样例兜底），`docs/data/` 内嵌完整 999+999 语料，落地页内嵌手机框 iframe 实时演示
+- **README 修订**：微习惯 14 → 30 条（与 v1.3 数据同步）、新增 Pages 部署三步说明、目录结构更新
+
 ## v1.4.0 (2026-11-24) · 工程稳定版
 
 ### 调度中枢 v2（daily_hub.py 全部重写）
