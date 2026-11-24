@@ -36,6 +36,11 @@ DATA_DIR = Path(os.environ.get(
     "PHONEBOX_DATA_DIR",
     Path(__file__).resolve().parent.parent / "data"))
 
+import os
+DATA_DIR = Path(os.environ.get(
+    "PHONEBOX_DATA_DIR",
+    Path(__file__).resolve().parent.parent / "data"))
+
 sys.path.insert(0, str(BASE))
 import ai_companion  # noqa: E402  伴读推送直接复用
 

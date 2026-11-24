@@ -46,7 +46,7 @@ OVERVIEW_HTML = """<style>
     <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 微习惯 · 提醒</span></button>
     <button class="tile" data-go="hub"><span class="ic">⏱️</span><span class="nm">定时中枢</span><span class="ds">心跳 · 日课提醒 · 轮播</span></button>
     <button class="tile" data-go="companion"><span class="ic">📖</span><span class="nm">AI 伴读</span><span class="ds">解读 · 思考题</span></button>
-    <button class="tile" data-go="ride"><span class="ic">🚴</span><span class="nm">骑行模式</span><span class="ds">GPS · 加速度计</span></button>
+    <button class="tile" data-go="ride"><span class="ic">🧘</span><span class="nm">静坐三省</span><span class="ds">呼吸引导 · 静坐计时</span></button>
     <button class="tile" data-go="home"><span class="ic">🏠</span><span class="nm">系统主页</span><span class="ds">时钟 · 媒体 · 状态</span></button>
   </div>
 </div>
@@ -149,6 +149,90 @@ def main():
         "id": "hub-status", "type": "html", "x": 0, "y": 0, "w": 12, "h": 6,
         "appearance": {"fontScale": 110},
         "options": {"html": HUB_HTML, "transparent": False},
+    }])
+
+    # 3.5) 静坐三省页（复用原骑行页的槽位，保持页序）：呼吸引导 + 静坐计时 + 三省打卡 + 日课轮读
+    XINGSHEN_HTML = """<style>
+  .wrap{height:100%;box-sizing:border-box;padding:1.2vh 1.6vw;display:flex;flex-direction:column;gap:1vh}
+  .top{display:flex;gap:1.2vw;flex:1;min-height:0}
+  .pane{background:rgba(255,255,255,.05);border:1px solid rgba(45,212,191,.28);border-radius:14px;padding:1vh 1.2vw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8vh}
+  .pane.l{flex:1.1}
+  .pane.r{flex:1}
+  .bt{font-size:clamp(12px,2vh,20px);color:#2dd4bf;letter-spacing:.14em}
+  .bwrap{position:relative;width:min(24vh,42vw);height:min(24vh,42vw);display:flex;align-items:center;justify-content:center}
+  .circle{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:50%;background:radial-gradient(circle,rgba(45,212,191,.35),rgba(45,212,191,.08));border:2px solid rgba(45,212,191,.5);animation:breathe 12s ease-in-out infinite;transform:translateZ(0)}
+  @keyframes breathe{0%{transform:scale(.55)}33.3%{transform:scale(1)}50%{transform:scale(1)}100%{transform:scale(.55)}}
+  .phase{font-size:clamp(24px,5.2vh,52px);color:#eef2f6;font-weight:700}
+  .cnt{font-size:clamp(12px,2vh,20px);color:#8a94a3}
+  .sitrow{display:flex;align-items:baseline;gap:1vw}
+  .sitmin{font-size:clamp(28px,6vh,58px);color:#eef2f6;font-weight:700}
+  .btn{font-size:clamp(14px,2.4vh,24px);color:#04211d;background:#2dd4bf;border:none;border-radius:10px;padding:.8vh 2vw;font-weight:700;cursor:pointer}
+  .btn.stop{background:#f59e0b;color:#231300}
+  .ex{font-size:clamp(11px,1.8vh,18px);color:#8a94a3}
+  .sans{display:flex;flex-direction:column;gap:.7vh}
+  .srow{display:flex;align-items:center;gap:1vw;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.22);border-radius:10px;padding:.7vh 1.2vw;cursor:pointer}
+  .srow .box{width:clamp(16px,3vh,28px);height:clamp(16px,3vh,28px);border:2px solid #2dd4bf;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;font-size:clamp(12px,2.2vh,20px);font-weight:700}
+  .srow.on .box{background:#2dd4bf;color:#04211d}
+  .srow.on{background:rgba(45,212,191,.16)}
+  .srow .tx{font-size:clamp(13px,2.4vh,24px);color:#eef2f6}
+  .foot{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.7vh 1.4vw;display:flex;flex-direction:column;gap:.3vh}
+  .foot .fk{font-size:clamp(10px,1.7vh,17px);color:#f59e0b;letter-spacing:.12em}
+  .foot .fv{font-size:clamp(15px,2.8vh,28px);color:#eef2f6}
+</style>
+<div class="wrap">
+  <div class="top">
+    <div class="pane l">
+      <div class="bt">主敬 · 呼吸引导</div>
+      <div class="bwrap"><div class="circle"></div><div class="phase" id="ph">吸</div></div>
+      <div class="cnt">吸 4s · 屏 2s · 呼 6s · 一息 12 秒</div>
+    </div>
+    <div class="pane r">
+      <div class="bt">静坐 · 体验来复</div>
+      <div class="sitrow"><span class="sitmin" id="sitmin">0</span><span class="ex">分钟</span></div>
+      <div class="ex" id="sittoday">今日累计 0 分钟</div>
+      <button class="btn" id="sitbtn">▶ 起坐计时</button>
+    </div>
+  </div>
+  <div class="sans">
+    <div class="srow" data-i="0"><span class="box">✓</span><span class="tx">为人谋而不忠乎？——尽心曰忠</span></div>
+    <div class="srow" data-i="1"><span class="box">✓</span><span class="tx">与朋友交而不信乎？——践诺曰信</span></div>
+    <div class="srow" data-i="2"><span class="box">✓</span><span class="tx">传不习乎？——温习曰学</span></div>
+  </div>
+  <div class="foot"><div class="fk">日课轮读</div><div class="fv" id="rike">主敬 · 整齐严肃，心不散乱</div></div>
+</div>
+<script>
+  var RIKES=["主敬 · 整齐严肃，心不散乱","静坐 · 每日四刻，体验来复","早起 · 黎明即起，醒后勿恋","读书不二 · 一书未完不看他书","读史 · 每日圈点十叶","谨言 · 刻刻留心，第一工夫","养气 · 气藏丹田，无不可对人言","保身 · 节劳、节欲、节饮食","日知所亡 · 记录当日心得","月无忘所能 · 每月作诗文数首","作字 · 早饭后临帖半小时","夜不出门 · 戒旷功疲神"];
+  setInterval(function(){var s=(Date.now()/1000)%12;document.getElementById('ph').textContent=s<4?'吸':(s<6?'屏':'呼');},400);
+  var ri=0;setInterval(function(){ri=(ri+1)%RIKES.length;var e=document.getElementById('rike');var n=e.cloneNode(false);n.textContent=RIKES[ri];e.parentNode.replaceChild(n,e);},15000);
+  var K='zc_sit_';function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+  var running=false,t0=0,tmr=null;
+  function painted(){var m=parseInt(localStorage.getItem(K+today())||'0',10);document.getElementById('sittoday').textContent='今日累计 '+m+' 分钟';}
+  document.getElementById('sitbtn').addEventListener('click',function(){
+    var b=document.getElementById('sitbtn');
+    if(!running){running=true;t0=Date.now();b.textContent='⏸ 收坐记钟';b.className='btn stop';
+      tmr=setInterval(function(){document.getElementById('sitmin').textContent=Math.floor((Date.now()-t0)/60000);},5000);}
+    else{running=false;clearInterval(tmr);var mins=Math.max(1,Math.round((Date.now()-t0)/60000));
+      var key=K+today();localStorage.setItem(key,(parseInt(localStorage.getItem(key)||'0',10)+mins)+'');
+      document.getElementById('sitmin').textContent='0';b.textContent='▶ 起坐计时';b.className='btn';painted();}
+  });
+  var day=today();
+  document.querySelectorAll('.srow').forEach(function(r){
+    var i=r.getAttribute('data-i'),k=K+'sans_'+day+'_'+i;
+    if(localStorage.getItem(k)==='1')r.classList.add('on');
+    r.addEventListener('click',function(){
+      if(r.classList.contains('on')){r.classList.remove('on');localStorage.removeItem(k);}
+      else{r.classList.add('on');localStorage.setItem(k,'1');}
+    });
+  });
+  painted();
+</script>"""
+    ride_old = next((p for p in pages if p.get("id") == "ride"), None)
+    if ride_old is not None:
+        ride_old["widgets"] = []  # 清掉骑行四件套，槽位复用为静坐三省
+    upsert_page(pages, "ride", "静坐三省", "🧘", [{
+        "id": "xingshen-main", "type": "html", "x": 0, "y": 0, "w": 12, "h": 6,
+        "appearance": {"fontScale": 110},
+        "options": {"html": XINGSHEN_HTML, "transparent": False},
     }])
 
     # 4) 金句页：push 组件的 .pv 样式写死 nowrap+省略号，长文必截断；
