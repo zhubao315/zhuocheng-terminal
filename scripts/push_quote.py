@@ -21,6 +21,11 @@ DATA_DIR = Path(os.environ.get(
     "PHONEBOX_DATA_DIR",
     Path(__file__).resolve().parent.parent / "data"))
 
+import os
+DATA_DIR = Path(os.environ.get(
+    "PHONEBOX_DATA_DIR",
+    Path(__file__).resolve().parent.parent / "data"))
+
 DATA = json.loads((DATA_DIR / "quotes.json").read_text(encoding="utf-8"))
 KEY = DATA["meta"]["push_key"]
 ITEMS = DATA["items"]

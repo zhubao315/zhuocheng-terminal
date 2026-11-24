@@ -42,9 +42,9 @@ OVERVIEW_HTML = """<style>
 <div class="wrap">
   <div class="head"><b>拙诚日课终端</b><span>· 五阶段 · 触屏切换</span></div>
   <div class="grid">
-    <button class="tile" data-go="rike"><span class="ic">💬</span><span class="nm">每日金句</span><span class="ds">大字金句 · 电量感知</span></button>
-    <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 两列勾选</span></button>
-    <button class="tile" data-go="hub"><span class="ic">⏱️</span><span class="nm">定时中枢</span><span class="ds">10 秒心跳 · 自动轮播</span></button>
+    <button class="tile" data-go="rike"><span class="ic">💬</span><span class="nm">每日金句</span><span class="ds">大字金句 · 品读语境</span></button>
+    <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 微习惯 · 提醒</span></button>
+    <button class="tile" data-go="hub"><span class="ic">⏱️</span><span class="nm">定时中枢</span><span class="ds">心跳 · 日课提醒 · 轮播</span></button>
     <button class="tile" data-go="companion"><span class="ic">📖</span><span class="nm">AI 伴读</span><span class="ds">解读 · 思考题</span></button>
     <button class="tile" data-go="ride"><span class="ic">🚴</span><span class="nm">骑行模式</span><span class="ds">GPS · 加速度计</span></button>
     <button class="tile" data-go="home"><span class="ic">🏠</span><span class="nm">系统主页</span><span class="ds">时钟 · 媒体 · 状态</span></button>
@@ -70,18 +70,19 @@ HUB_HTML = """<style>
 <div class="wrap">
   <div class="head"><b>定时中枢</b><span>电脑端 Python · 10 秒心跳</span></div>
   <div class="rows">
+    <div class="row hl"><span class="k" id="kr">日课提醒</span><span class="v" id="r">等待推送…</span></div>
     <div class="row hl"><span class="k" id="km">今日微习惯</span><span class="v" id="h">等待推送…</span></div>
     <div class="row"><span class="k" id="kq">今日金句</span><span class="v" id="q">等待推送…</span></div>
     <div class="row"><span class="k" id="kb">手机电量 / 温度</span><span class="v" id="b">等待推送…</span></div>
     <div class="row"><span class="k" id="ks">环境感知</span><span class="v" id="s">等待推送…</span></div>
     <div class="row"><span class="k" id="ki">中枢心跳</span><span class="v" id="i">等待推送…</span></div>
   </div>
-  <div class="foot">金句 10s · 伴读 30s · 微习惯 60min · 硬件 90s · 设备离线时轮播照常</div>
+  <div class="foot">金句 10s · 伴读 30s · 日课提醒 15min · 微习惯 60min · 硬件 90s · 离线照常轮播</div>
 </div>
 <script>
   function item(k){var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};return p[k]&&p[k].data?p[k].data:null;}
   function show(){
-    [['micro-habit','h','km','今日微习惯'],['daily-quote','q','kq','今日金句'],['phone-batt','b','kb','手机电量 / 温度'],['phone-sensor','s','ks','环境感知'],['hub-info','i','ki','中枢心跳']].forEach(function(t){
+    [['rike-reminder','r','kr','日课提醒'],['micro-habit','h','km','今日微习惯'],['daily-quote','q','kq','今日金句'],['phone-batt','b','kb','手机电量 / 温度'],['phone-sensor','s','ks','环境感知'],['hub-info','i','ki','中枢心跳']].forEach(function(t){
       var d=item(t[0]);
       document.getElementById(t[1]).textContent=d?(d.value||'—'):'等待推送…';
       document.getElementById(t[2]).textContent=(d&&d.sub)?d.sub:t[3];
@@ -150,7 +151,7 @@ def main():
         "options": {"html": HUB_HTML, "transparent": False},
     }])
 
-    # 4) 金句页：push 组件的 .pv 样式写死 nowrap+省略号，长句必截断；
+    # 4) 金句页：push 组件的 .pv 样式写死 nowrap+省略号，长文必截断；
     #    改用 HTML 组件自动换行，字号用容器单位保持"大字"观感
     QUOTE_HTML = """<style>
   .wrap{height:100%;box-sizing:border-box;padding:1.2vh 1.8vw;display:flex;flex-direction:column;justify-content:center;gap:1.2vh}
@@ -169,9 +170,35 @@ def main():
         # 去重：清掉 quote-main 和历次部署遗留的 quote-main-h / -h-2 / -h-3 …
         rike["widgets"] = [w for w in rike["widgets"]
                            if not str(w.get("id", "")).startswith("quote-main")]
+
+    # 金句页下半屏：品读语境（主题·出处 + 时辰宜事），替代原先的电量/亮度组件
+    QUOTE_FOOT_HTML = """<style>
+  .wrap{height:100%;box-sizing:border-box;padding:.6vh 1.8vw 1vh;display:flex;gap:1.2vw}
+  .card{flex:1;min-width:0;background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.25);border-radius:12px;padding:.8vh 1.4vw;display:flex;flex-direction:column;justify-content:center;gap:.4vh}
+  .k{font-size:clamp(10px,1.8vh,18px);color:#2dd4bf;letter-spacing:.1em}
+  .v{font-size:clamp(14px,2.7vh,27px);color:#eef2f6;overflow-wrap:break-word;word-break:break-word;transform:translateZ(0)}
+  .s{font-size:clamp(11px,1.9vh,19px);color:#8a94a3;overflow-wrap:break-word;word-break:break-word}
+</style>
+<div class="wrap">
+  <div class="card"><span class="k">🏷️ 主题 · 出处</span><span class="v" id="fm">等待推送…</span><span class="s" id="fs"></span></div>
+  <div class="card"><span class="k">🕰️ 时辰宜事</span><span class="v" id="hv">等待推送…</span><span class="s" id="hs"></span></div>
+</div>
+<script>
+  function put(id,txt){var e=document.getElementById(id);if(e.textContent===txt)return;var n=e.cloneNode(false);n.textContent=txt;e.parentNode.replaceChild(n,e);}
+  function show(){var p=(window.phonebox&&phonebox.data&&phonebox.data.push)||{};
+    var m=p['quote-meta'];if(m&&m.data){put('fm',m.data.value||'—');put('fs',m.data.sub||'');}
+    var h=p['quote-hour'];if(h&&h.data){put('hv',h.data.value||'—');put('hs',h.data.sub||'');}}
+  phonebox.on('push',show);show();
+</script>"""
+    if rike:
+        rike["widgets"] = [w for w in rike["widgets"] if w.get("id") not in {"phone-batt", "phone-sensor"}]
         rike["widgets"].append({
             "id": "quote-main-h", "type": "html", "x": 0, "y": 0, "w": 12, "h": 4,
             "options": {"html": QUOTE_HTML, "transparent": False},
+        })
+        rike["widgets"].append({
+            "id": "quote-foot", "type": "html", "x": 0, "y": 4, "w": 12, "h": 2,
+            "options": {"html": QUOTE_FOOT_HTML, "transparent": False},
         })
     else:
         print("⚠ 找不到 rike 页，金句组件未调整")
