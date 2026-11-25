@@ -7,6 +7,22 @@
   var KEY = 'zhuocheng.offline.v2';
   var D = window.ZC_DATA || { quotes: [], companions: [], microhabits: [], rike: [], reminders: [] };
   var PAGES = ['overview', 'quote', 'companion', 'rike', 'habit', 'sit', 'archive'];
+  var SCREEN_MODULES = [
+    { key: 'quote', label: '每日金句' },
+    { key: 'companion', label: 'AI 伴读' },
+    { key: 'rike', label: '日课十二条' },
+    { key: 'habit', label: '微习惯' },
+    { key: 'sit', label: '静坐三省' },
+    { key: 'archive', label: '成长档案' }
+  ];
+  var ALL_MODULES = ['quote', 'companion', 'rike', 'habit', 'sit', 'archive'];
+  // 多端预设：留白用于避开固定系统栏/外壳区域；scale 控制信息屏字号
+  var PROFILES = {
+    'note2-landscape': { safeTop: 0, safeBottom: 0, scale: 1.45, sec: 20 },
+    'note2-portrait': { safeTop: 0, safeBottom: 0, scale: 1.15, sec: 18 },
+    'tablet': { safeTop: 12, safeBottom: 12, scale: 1.25, sec: 20 },
+    'desktop': { safeTop: 0, safeBottom: 0, scale: 1.1, sec: 25 }
+  };
   var $ = function (id) { return document.getElementById(id); };
   var currentPage = 'overview';
   var viewDate = '';
@@ -46,7 +62,11 @@
     return {
       v: 2,
       today: dateKey(new Date()),
-      settings: { theme: 'dark', fontScale: 1, quoteSec: 180, companionSec: 600, habitSec: 3600 },
+      settings: {
+        theme: 'dark', fontScale: 1, quoteSec: 180, companionSec: 600, habitSec: 3600,
+        mode: 'screen', profile: 'auto', safeTop: 0, safeBottom: 0,
+        screenScale: 1.45, screenSec: 20, screenModules: ALL_MODULES.slice()
+      },
       idx: { quote: 0, companion: 0, habit: 0 },
       paused: { quote: false, companion: false, habit: false },
       days: {},
@@ -68,6 +88,9 @@
     if (!s.days) s.days = {};
     if (!s.favs) s.favs = d.favs;
     for (var k in d.settings) { if (s.settings[k] == null) s.settings[k] = d.settings[k]; }
+    if (s.settings.mode !== 'full') s.settings.mode = 'screen';
+    if (!PROFILES[s.settings.profile] && s.settings.profile !== 'auto') s.settings.profile = 'auto';
+    if (!s.settings.screenModules || !s.settings.screenModules.length) s.settings.screenModules = ALL_MODULES.slice();
     for (var t in d.idx) { if (s.idx[t] == null) s.idx[t] = 0; }
     for (var p in d.paused) { if (s.paused[p] == null) s.paused[p] = false; }
     if (!s.favs.quote) s.favs.quote = [];
@@ -161,8 +184,219 @@
 
   function applyTheme() {
     var light = S.settings.theme === 'light';
-    document.body.className = light ? 'light' : '';
-    $('themeBtn').textContent = light ? '夜间' : '日间';
+    document.body.className = (light ? 'light ' : '') + (S.settings.mode === 'screen' ? 'screen-mode' : '');
+    if ($('themeBtn')) $('themeBtn').textContent = light ? '夜间' : '日间';
+  }
+
+  /* ---------------- 信息屏（默认形态，极少互动） ---------------- */
+
+  var screenOrder = ALL_MODULES.slice();
+  var screenAt = 0, screenElapsed = 0, screenPaused = false;
+  var hintTimer = null, suppressClick = false, swiped = false, longTimer = null;
+  var touchX = 0, touchY = 0, tapCount = 0, singleTimer = null;
+
+  function currentProfile() {
+    var p = S.settings.profile;
+    if (p === 'auto') return window.innerWidth >= window.innerHeight ? 'note2-landscape' : 'note2-portrait';
+    return PROFILES[p] ? p : 'note2-landscape';
+  }
+
+  function applyScreenConfig() {
+    var st = S.settings;
+    var p = PROFILES[currentProfile()];
+    if (st.profile === 'auto' && !st.autoTuned) {
+      st.safeTop = p.safeTop; st.safeBottom = p.safeBottom;
+      st.screenScale = p.scale; st.screenSec = p.sec;
+    }
+    var root = document.documentElement;
+    root.style.setProperty('--safe-top', Math.max(0, st.safeTop) + 'px');
+    root.style.setProperty('--safe-bottom', Math.max(0, st.safeBottom) + 'px');
+    root.style.setProperty('--screen-scale', String(st.screenScale));
+    applyTheme();
+    var order = [];
+    for (var i = 0; i < ALL_MODULES.length; i++) {
+      if (st.screenModules.indexOf(ALL_MODULES[i]) >= 0) order.push(ALL_MODULES[i]);
+    }
+    screenOrder = order.length ? order : ALL_MODULES.slice();
+    if (screenAt >= screenOrder.length) screenAt = 0;
+    if (st.mode === 'screen') renderScreen();
+  }
+
+  function showHint() {
+    var h = $('scHint');
+    if (!h) return;
+    h.className = 'screen-hint';
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { h.className = 'screen-hint dim'; }, 6000);
+  }
+
+  function screenHtml(key) {
+    var now = new Date();
+    var q, h, c, d, i, n;
+    if (key === 'quote') {
+      q = current('quote');
+      return '<div class="sc-quote"><span class="sc-kicker">今日金句 · ' + (S.idx.quote + 1) + ' / ' +
+        D.quotes.length + '</span><blockquote>' + esc(q.text || '—') + '</blockquote>' +
+        '<div class="sc-source">' + esc(q.source || '—') + (q.tag ? ' · ' + esc(q.tag) : '') + '</div></div>';
+    }
+    if (key === 'companion') {
+      c = current('companion');
+      return '<div class="sc-companion"><span class="sc-kicker">AI 伴读 · ' + (S.idx.companion + 1) + ' / ' +
+        D.companions.length + '</span><p class="sc-passage">' + esc(c.passage || '—') + '</p>' +
+        '<div class="sc-source">' + esc(c.source || '—') + '</div>' +
+        '<p class="sc-insight">' + esc(c.insight || '') + '</p>' +
+        '<div class="sc-question">今日一问 · ' + esc(c.question || '') + '</div></div>';
+    }
+    if (key === 'rike') {
+      d = ensureDay(today());
+      n = rikeDone(today());
+      var grid = '';
+      for (i = 0; i < D.rike.length; i++) {
+        grid += '<div class="sc-item' + (d.rike[i] ? ' done' : '') + '"><span class="tick">' +
+          (d.rike[i] ? '✓' : '') + '</span>' + esc(D.rike[i]) + '</div>';
+      }
+      return '<div class="sc-rike"><span class="sc-kicker">曾国藩日课十二条 · 今日 ' + n + ' / ' +
+        D.rike.length + '</span><div class="sc-grid">' + grid + '</div></div>';
+    }
+    if (key === 'habit') {
+      h = current('habit'); d = ensureDay(today());
+      var doneHabit = 0;
+      for (var hk in d.habits) { if (d.habits[hk] === 'done') doneHabit++; }
+      return '<div class="sc-habit"><span class="sc-kicker">微习惯 · 此刻行动</span>' +
+        '<div class="sc-action">' + esc(h.habit || '—') + '</div><div class="sc-chips">' +
+        '<span>对应日课 · ' + esc(h.maps || '—') + '</span><span>' + (h.duration_minutes || 2) + ' 分钟</span>' +
+        '<span>今日完成 ' + doneHabit + '</span></div></div>';
+    }
+    if (key === 'sit') {
+      d = ensureDay(today());
+      return '<div class="sc-sit"><span class="sc-kicker">静坐三省 · 回到自己</span>' +
+        '<div class="breath running"><span>静</span></div>' +
+        '<p class="sc-hintline">今日已静坐 ' + d.sits.length + ' 次 · 调匀呼吸，走神了轻轻回来</p></div>';
+    }
+    if (key === 'archive') {
+      var days = activeDays(), sits = 0, minutes = 0, habits = 0;
+      for (i = 0; i < days.length; i++) {
+        d = S.days[days[i]];
+        sits += d.sits.length;
+        for (var j = 0; j < d.sits.length; j++) minutes += (d.sits[j].minutes || 0);
+        for (var hb in d.habits) { if (d.habits[hb] === 'done') habits++; }
+      }
+      var week = '';
+      for (var b = 6; b >= 0; b--) {
+        var dk = shiftDate(today(), -b);
+        var dn = rikeDone(dk);
+        var pct = Math.round(dn / (D.rike.length || 12) * 100);
+        week += '<div class="week-row"><span>' + dk.slice(5) + '</span><div class="week-bar"><i style="width:' +
+          pct + '%"></i></div><b>' + dn + '/' + D.rike.length + '</b></div>';
+      }
+      return '<div class="sc-archive"><span class="sc-kicker">成长档案 · 全部留在本机</span>' +
+        '<div class="sc-stats"><div class="sc-stat"><small>连续天数</small><b>' + streak() + '</b></div>' +
+        '<div class="sc-stat"><small>有记录天数</small><b>' + days.length + '</b></div>' +
+        '<div class="sc-stat"><small>微习惯完成</small><b>' + habits + '</b></div>' +
+        '<div class="sc-stat"><small>静坐次 / 分</small><b>' + sits + ' / ' + minutes + '</b></div></div>' +
+        '<div class="sc-week">' + week + '</div></div>';
+    }
+    return '<div class="sc-quote"><blockquote>拙诚日课终端</blockquote></div>';
+  }
+
+  function renderScreen() {
+    if (!screenOrder.length) screenOrder = ALL_MODULES.slice();
+    if (screenAt >= screenOrder.length) screenAt = 0;
+    var now = new Date();
+    $('scDate').textContent = now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() +
+      ' 日 · 星期' + weekText(now);
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
+      (screenPaused ? ' · 已暂停' : '');
+    $('scBody').innerHTML = screenHtml(screenOrder[screenAt]);
+    $('scProgress').style.width = Math.round(screenElapsed / Math.max(1, S.settings.screenSec) * 100) + '%';
+  }
+
+  function screenStep(delta) {
+    if (!screenOrder.length) return;
+    screenAt = (screenAt + delta + screenOrder.length) % screenOrder.length;
+    screenElapsed = 0;
+    renderScreen();
+    showHint();
+  }
+
+  function screenTick() {
+    if (S.settings.mode !== 'screen') return;
+    var now = new Date();
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
+      (screenPaused ? ' · 已暂停' : '');
+    if (screenPaused) return;
+    screenElapsed++;
+    if (screenElapsed >= Math.max(5, S.settings.screenSec)) { screenStep(1); }
+    else $('scProgress').style.width = Math.round(screenElapsed / Math.max(5, S.settings.screenSec) * 100) + '%';
+  }
+
+  function openConfig() {
+    var st = S.settings;
+    $('cfgTop').value = st.safeTop;
+    $('cfgBottom').value = st.safeBottom;
+    $('cfgScale').value = st.screenScale;
+    $('cfgSec').value = st.screenSec;
+    $('cfgTheme').value = st.theme;
+    $('cfgMode').value = st.mode;
+    var ps = $('cfgProfiles').getElementsByTagName('button');
+    for (var i = 0; i < ps.length; i++) {
+      ps[i].className = ps[i].getAttribute('data-profile') === st.profile ? 'active' : '';
+    }
+    var mh = '';
+    for (var m = 0; m < SCREEN_MODULES.length; m++) {
+      var sm = SCREEN_MODULES[m];
+      mh += '<label><input type="checkbox" data-key="' + sm.key + '"' +
+        (st.screenModules.indexOf(sm.key) >= 0 ? ' checked' : '') + '>' + sm.label + '</label>';
+    }
+    $('cfgModules').innerHTML = mh;
+    $('cfgMask').hidden = false;
+    $('cfgPanel').hidden = false;
+    screenPaused = true;
+    suppressClick = true;
+  }
+
+  function closeConfig() {
+    $('cfgMask').hidden = true;
+    $('cfgPanel').hidden = true;
+    screenPaused = false;
+    screenElapsed = 0;
+    suppressClick = true;
+    renderScreen();
+  }
+
+  function readConfigForm() {
+    var st = S.settings;
+    var active = $('cfgProfiles').querySelector('button.active');
+    var boxes = $('cfgModules').getElementsByTagName('input');
+    var mods = [];
+    for (var i = 0; i < boxes.length; i++) { if (boxes[i].checked) mods.push(boxes[i].getAttribute('data-key')); }
+    st.profile = active ? active.getAttribute('data-profile') : 'auto';
+    st.safeTop = Math.min(240, Math.max(0, parseInt($('cfgTop').value, 10) || 0));
+    st.safeBottom = Math.min(240, Math.max(0, parseInt($('cfgBottom').value, 10) || 0));
+    st.screenScale = Math.min(1.8, Math.max(0.8, parseFloat($('cfgScale').value) || 1));
+    st.screenSec = Math.min(300, Math.max(5, parseInt($('cfgSec').value, 10) || 20));
+    st.theme = $('cfgTheme').value;
+    st.mode = $('cfgMode').value;
+    st.screenModules = mods.length ? mods : ALL_MODULES.slice();
+    st.autoTuned = true;
+  }
+
+  function saveConfig() {
+    readConfigForm();
+    save();
+    closeConfig();
+    applyScreenConfig();
+    renderScreen();
+    toast('配置已保存到本机');
+  }
+
+  function resetConfig() {
+    var d = defaults();
+    for (var k in d.settings) { S.settings[k] = d.settings[k]; }
+    save();
+    openConfig();
+    applyScreenConfig();
+    toast('已恢复默认配置');
   }
 
   /* ---------------- 页面渲染 ---------------- */
@@ -404,6 +638,73 @@
   }
 
   function bind() {
+    // 信息屏：轻触换屏、双击暂停、长按配置、左右滑动换屏
+    var sc = $('screen');
+    sc.addEventListener('touchstart', function (e) {
+      var t = e.touches[0];
+      touchX = t.clientX; touchY = t.clientY; swiped = false;
+      if (longTimer) clearTimeout(longTimer);
+      longTimer = setTimeout(function () { longTimer = null; openConfig(); }, 650);
+    }, { passive: true });
+    sc.addEventListener('touchmove', function (e) {
+      var t = e.touches[0];
+      if (Math.abs(t.clientX - touchX) > 40 || Math.abs(t.clientY - touchY) > 40) {
+        swiped = true;
+        if (longTimer) { clearTimeout(longTimer); longTimer = null; }
+      }
+    }, { passive: true });
+    sc.addEventListener('touchend', function (e) {
+      if (longTimer) { clearTimeout(longTimer); longTimer = null; }
+      if (swiped) {
+        var t = e.changedTouches[0];
+        if (Math.abs(t.clientX - touchX) > Math.abs(t.clientY - touchY)) screenStep(t.clientX < touchX ? 1 : -1);
+        suppressClick = true;
+      }
+    }, { passive: true });
+    sc.addEventListener('click', function () {
+      if (suppressClick) { suppressClick = false; return; }
+      tapCount++;
+      if (tapCount === 1) {
+        singleTimer = setTimeout(function () { screenStep(1); tapCount = 0; singleTimer = null; }, 320);
+      } else if (tapCount === 2) {
+        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
+        screenPaused = !screenPaused;
+        renderScreen();
+        toast(screenPaused ? '轮播已暂停' : '轮播已继续');
+        tapCount = 0;
+      }
+    });
+
+    $('cfgBtn').onclick = openConfig;
+    $('cfgClose').onclick = closeConfig;
+    $('cfgMask').onclick = closeConfig;
+    $('cfgSave').onclick = saveConfig;
+    $('cfgReset').onclick = resetConfig;
+    var pbs = $('cfgProfiles').getElementsByTagName('button');
+    for (var pi = 0; pi < pbs.length; pi++) {
+      (function (btn) {
+        btn.onclick = function () {
+          var p = PROFILES[btn.getAttribute('data-profile')];
+          if (!p) return;
+          for (var x = 0; x < pbs.length; x++) pbs[x].className = '';
+          btn.className = 'active';
+          $('cfgTop').value = p.safeTop;
+          $('cfgBottom').value = p.safeBottom;
+          $('cfgScale').value = p.scale;
+          $('cfgSec').value = p.sec;
+        };
+      })(pbs[pi]);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (S.settings.mode !== 'screen' || !$('cfgPanel').hidden) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { screenStep(1); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { screenStep(-1); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'Enter') {
+        screenPaused = !screenPaused; renderScreen(); e.preventDefault();
+      } else if (e.key === 'c' || e.key === 'C') { openConfig(); }
+    });
+
     $('themeBtn').onclick = function () {
       S.settings.theme = S.settings.theme === 'light' ? 'dark' : 'light';
       save(); applyTheme(); toast(S.settings.theme === 'light' ? '已切换日间主题' : '已切换夜间主题');
@@ -511,12 +812,41 @@
     };
   }
 
-  window.ZC = { show: show, advance: advance, state: function () { return S; } };
+  window.ZC = {
+    show: show, advance: advance, state: function () { return S; },
+    screenNext: function () { screenStep(1); },
+    screenPrev: function () { screenStep(-1); },
+    screenMode: function (on) {
+      S.settings.mode = on ? 'screen' : 'full'; save(); applyScreenConfig(); renderScreen();
+    },
+    setConfig: function (patch) {
+      for (var k in patch) { if (Object.prototype.hasOwnProperty.call(patch, k)) S.settings[k] = patch[k]; }
+      save(); applyScreenConfig(); renderScreen();
+    },
+    config: function () {
+      return {
+        profile: currentProfile(), mode: S.settings.mode, safeTop: S.settings.safeTop,
+        safeBottom: S.settings.safeBottom, scale: S.settings.screenScale, sec: S.settings.screenSec,
+        order: screenOrder.slice(), at: screenAt, paused: screenPaused
+      };
+    },
+    openConfig: openConfig, closeConfig: closeConfig
+  };
 
   today();
-  applyTheme();
+  try {
+    var qs = window.location.search || '';
+    var pm = /[?&]profile=([^&]+)/.exec(qs);
+    var md = /[?&]mode=([^&]+)/.exec(qs);
+    if (pm && PROFILES[pm[1]]) S.settings.profile = pm[1];
+    if (md && (md[1] === 'screen' || md[1] === 'full')) S.settings.mode = md[1];
+  } catch (e) { /* file:// 下忽略 */ }
+  applyScreenConfig();
   bind();
   var hash = (window.location.hash || '').replace('#', '');
   show(PAGES.indexOf(hash) >= 0 ? hash : 'overview');
+  renderScreen();
+  showHint();
   setInterval(tick, 1000);
+  setInterval(screenTick, 1000);
 })();
