@@ -6,8 +6,8 @@
 |---|---|
 | 版本 | v1.4.4（中枢 v2.0.0；PhoneBox 基座 0.9.29） |
 | 文件 | `releases/zhuocheng-terminal-v2signed.apk`（Pages 镜像：`docs/releases/`） |
-| 大小 | **2,360,492 字节** |
-| SHA-256 | `9a0356bbf961ea6373fa6e9a19016d5a7d89f8cbecdf4a2b5da6d9890659a45a` |
+| 大小 | **2,360,718 字节** |
+| SHA-256 | `845afa9336a5717b6c2ce77fbd4d59e9d5ef69bf86176a4efa970b974fbaa7fb` |
 | 签名 | v1（JAR）+ v2（APK Signature Scheme v2），同一密钥 |
 | 证书 SHA-256 指纹 | `fe7a86a5e0a3b7776fbcbedd6595d879f33a999a4fcf10154639eadc5f90e5be` |
 | 包名 | `net.oxog.phonebox.deskpanel` |
@@ -25,7 +25,7 @@ curl -O https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-termin
 curl -O https://raw.githubusercontent.com/zhubao315/zhuocheng-terminal/main/releases/zhuocheng-terminal-v2signed.apk
 
 sha256sum zhuocheng-terminal-v2signed.apk
-# 应输出 9a0356bbf961ea6373fa6e9a19016d5a7d89f8cbecdf4a2b5da6d9890659a45a
+# 应输出 845afa9336a5717b6c2ce77fbd4d59e9d5ef69bf86176a4efa970b974fbaa7fb
 
 # 签名指纹（需本机已有 .keys/；签名器 --fingerprint 会拒绝身份不完整）
 python scripts/sign_apk_v2.py --fingerprint
