@@ -125,23 +125,27 @@ textarea{width:100%;margin-top:10px;background:var(--panel2);border:1px solid va
 #tabs button span{font-size:17px;line-height:1.2;margin-bottom:2px;color:var(--muted)}
 #tabs button.active{color:var(--gold)}
 #tabs button.active span{color:var(--gold)}
-/* ===== 信息屏模式（默认）：全屏、自动轮播、无顶底导航 ===== */
+/* ===== 信息屏模式（默认）：全屏、静态常亮、栏目手动左右切换、无顶底导航 ===== */
 :root{--safe-top:0px;--safe-bottom:0px;--screen-scale:1}
 body.screen-mode #topbar,body.screen-mode #tabs,body.screen-mode #main{display:none!important}
 body.screen-mode #app{height:100%;position:relative}
 body.screen-mode #cfgBtn{opacity:.18}
 #screen{display:none;position:absolute;left:0;right:0;top:0;bottom:0;flex-direction:column;overflow:hidden;
-  padding:calc(var(--safe-top) + 14px) 24px calc(var(--safe-bottom) + 12px)}
+  padding:calc(var(--safe-top) + 14px) 24px calc(var(--safe-bottom) + 10px)}
 body.screen-mode #screen{display:flex}
 .screen-top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;
   color:var(--muted);font-size:13px;letter-spacing:.05em}
-.screen-tag{color:var(--teal);font-size:12px}
-.screen-tag i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:6px}
-.screen-progress{height:3px;background:var(--panel2);border-radius:3px;margin:10px 0 0;overflow:hidden;flex:0 0 auto}
-.screen-progress i{display:block;height:100%;width:0;background:var(--gold);transition:width .9s linear}
+/* 顶部中间显示品牌名「拙诚日课」，不再显示「纯离线 · 信息屏」 */
+.screen-tag{color:var(--gold);font-size:14px;font-weight:600;letter-spacing:.28em}
+.screen-tag i{display:inline-block;width:6px;height:6px;border-radius:2px;background:var(--gold);margin-right:9px;vertical-align:2px}
 .screen-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;
   overflow:hidden;padding:1.5vh 0}
-.screen-hint{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.08em;opacity:.55;
+/* 六个栏目切换条：极薄、低调、可点；不自动轮播 */
+.screen-nav{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;flex:0 0 auto;padding:4px 0 2px}
+.screen-nav button{background:none;border:1px solid transparent;color:var(--muted);font-size:12px;
+  letter-spacing:.12em;padding:5px 11px;min-height:0;line-height:1.2;border-radius:8px;opacity:.42}
+.screen-nav button.active{color:var(--gold);opacity:1;border-color:var(--line);background:var(--panel)}
+.screen-hint{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.08em;opacity:.5;
   flex:0 0 auto;transition:opacity .8s}
 .screen-hint.dim{opacity:.07}
 .sc-kicker{display:block;color:var(--gold);font-size:calc(14px * var(--screen-scale));letter-spacing:.18em;margin-bottom:2vh}
@@ -184,9 +188,12 @@ body.screen-mode #screen{display:flex}
 #cfgBtn:hover{opacity:1}
 body:not(.screen-mode) #cfgBtn{bottom:100px}
 .cfg-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,.5);z-index:40}
-.cfg-panel{position:fixed;right:0;top:0;bottom:0;width:min(430px,92vw);z-index:41;overflow-y:auto;
-  background:var(--panel);border-left:1px solid var(--line);padding:18px 20px 28px}
-.cfg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+/* 头部与底部按钮固定，中间内容区独立滚动：任何屏高下按钮都不遮挡控件 */
+.cfg-panel{position:fixed;right:0;top:0;bottom:0;width:min(430px,92vw);z-index:41;
+  display:flex;flex-direction:column;overflow:hidden;
+  background:var(--panel);border-left:1px solid var(--line);padding:18px 20px 20px}
+.cfg-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.cfg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex:0 0 auto}
 .cfg-head b{font-size:18px;letter-spacing:.08em}
 .cfg-head button{min-height:34px;padding:5px 12px}
 .cfg-panel .label{margin:16px 0 8px}
@@ -202,14 +209,16 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
 .cfg-modules label{font-size:12px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
   border-radius:8px;padding:8px;display:flex;align-items:center}
 .cfg-modules input{width:16px;height:16px;margin-right:8px}
-.cfg-actions{display:flex;gap:10px;margin-top:20px}
+.cfg-actions{display:flex;gap:10px;margin-top:12px;flex:0 0 auto}
 .cfg-actions button{flex:1}
 
 /* 矮屏横屏（如红米 Note 2 的 1080×608 CSS 视口）：压缩信息密度，避免顶部被裁 */
 @media (max-height:700px) and (orientation:landscape){
-  #screen{padding-top:10px;padding-bottom:8px}
+  #screen{padding-top:10px;padding-bottom:6px}
   .screen-top{font-size:11px}
-  .screen-progress{margin-top:6px}
+  .screen-tag{font-size:12px;letter-spacing:.22em}
+  .screen-nav{padding:2px 0 1px;gap:2px}
+  .screen-nav button{font-size:10px;padding:3px 8px;letter-spacing:.08em}
   .screen-hint{font-size:10px}
   .sc-kicker{font-size:calc(12px * var(--screen-scale));margin-bottom:1vh}
   .sc-quote blockquote{font-size:calc(36px * var(--screen-scale));line-height:1.4}
@@ -232,25 +241,23 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   .sc-week{margin-top:1vh}
   .sc-week .week-row{font-size:calc(11px * var(--screen-scale));margin-top:4px}
   .sc-week .week-bar{height:8px}
-  /* 配置抽屉在矮屏上收紧，一屏内可见全部控件 */
-  .cfg-panel{padding:8px 12px 10px}
-  .cfg-head{margin-bottom:2px}
-  .cfg-head b{font-size:14px}
-  .cfg-head button{min-height:26px;padding:2px 8px;font-size:11px}
-  .cfg-panel .label{margin:5px 0 2px;font-size:9px}
-  .cfg-profiles{grid-gap:4px}
-  .cfg-profiles button{font-size:10px;min-height:26px;padding:2px}
-  .cfg-row{margin:2px 0;gap:6px}
+  /* 配置抽屉在矮屏上收紧；内容区独立滚动、按钮固定不遮挡 */
+  .cfg-panel{padding:5px 10px 6px}
+  .cfg-head{margin-bottom:0}
+  .cfg-head b{font-size:13px}
+  .cfg-head button{min-height:24px;padding:2px 8px;font-size:11px}
+  .cfg-panel .label{margin:3px 0 1px;font-size:9px}
+  .cfg-profiles{grid-gap:3px}
+  .cfg-profiles button{font-size:10px;min-height:22px;padding:1px}
+  .cfg-row{margin:0;gap:6px}
   .cfg-row label{font-size:9px}
-  .cfg-row input,.cfg-row select{margin-top:1px;padding:3px;font-size:11px;min-height:26px}
-  .cfg-row input[type=range]{min-height:26px}
-  .cfg-modules{grid-template-columns:repeat(3,1fr);grid-gap:3px}
-  .cfg-modules label{font-size:10px;padding:3px}
-  .cfg-modules input{width:13px;height:13px;margin-right:4px}
-  .cfg-actions{position:sticky;bottom:0;z-index:2;margin-top:5px;padding:4px 0 2px;
-    background:var(--panel);border-top:1px solid var(--line)}
-  .cfg-actions button{min-height:28px;padding:3px;font-size:12px}
-  .cfg-modules{margin-bottom:38px}
+  .cfg-row input,.cfg-row select{margin-top:1px;padding:2px;font-size:11px;min-height:22px}
+  .cfg-row input[type=range]{min-height:22px}
+  .cfg-modules{grid-template-columns:repeat(6,1fr);grid-gap:2px}
+  .cfg-modules label{font-size:9px;padding:3px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;justify-content:center}
+  .cfg-modules input{width:11px;height:11px;margin-right:3px;flex:0 0 11px}
+  .cfg-actions{margin-top:4px;padding-top:3px;border-top:1px solid var(--line)}
+  .cfg-actions button{min-height:26px;padding:2px;font-size:12px}
   .cfg-panel .footnote{display:none}
 }
 
@@ -276,12 +283,12 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   <section id="screen" class="screen">
     <div class="screen-top">
       <span id="scDate">—</span>
-      <span class="screen-tag"><i></i>纯离线 · 信息屏</span>
+      <span class="screen-tag"><i></i>拙诚日课</span>
       <span id="scClock">—</span>
     </div>
-    <div class="screen-progress"><i id="scProgress"></i></div>
     <div id="scBody" class="screen-body"></div>
-    <div id="scHint" class="screen-hint">轻触换屏 · 双击暂停 · 长按配置</div>
+    <div id="scNav" class="screen-nav"></div>
+    <div id="scHint" class="screen-hint">左右滑动 / 点击栏目切换 · 长按配置</div>
   </section>
 
   <header id="topbar">
@@ -453,6 +460,7 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   <div id="cfgMask" class="cfg-mask" hidden></div>
   <aside id="cfgPanel" class="cfg-panel" hidden>
     <div class="cfg-head"><b>多端配置</b><button id="cfgClose" type="button" class="ghost">关闭</button></div>
+    <div class="cfg-scroll">
 
     <small class="label">设备预设</small>
     <div id="cfgProfiles" class="cfg-profiles">
@@ -468,20 +476,22 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
 
     <small class="label">显示</small>
     <div class="cfg-row"><label>字号 <input id="cfgScale" type="range" min="0.8" max="1.8" step="0.05"></label>
-      <label>每屏秒数 <input id="cfgSec" type="number" min="5" max="300" step="5"></label></div>
+      <label>默认栏目
+      <select id="cfgStart"><option value="quote">每日金句</option><option value="companion">AI 伴读</option><option value="rike">日课十二条</option><option value="habit">微习惯</option><option value="sit">静坐三省</option><option value="archive">成长档案</option></select></label></div>
     <div class="cfg-row"><label>主题
       <select id="cfgTheme"><option value="dark">夜间</option><option value="light">日间</option></select></label>
       <label>模式
       <select id="cfgMode"><option value="screen">信息屏（推荐）</option><option value="full">完整交互</option></select></label></div>
 
-    <small class="label">轮播模块</small>
+    <small class="label">显示栏目（左右切换按此顺序）</small>
     <div id="cfgModules" class="cfg-modules"></div>
+    <p class="footnote">配置只存本机。信息屏默认停在「默认栏目」，不再自动轮播；左右滑动、点屏幕左右半区或点栏目名即可手动切换。顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
+    </div>
 
     <div class="cfg-actions">
       <button id="cfgSave" class="primary" type="button">保存并应用</button>
       <button id="cfgReset" type="button">恢复默认</button>
     </div>
-    <p class="footnote">配置只存本机。换成其他设备时，选对应预设即可；顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
   </aside>
 </div>
 <div id="toast"></div>
@@ -506,10 +516,10 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   var ALL_MODULES = ['quote', 'companion', 'rike', 'habit', 'sit', 'archive'];
   // 多端预设：留白用于避开固定系统栏/外壳区域；scale 控制信息屏字号
   var PROFILES = {
-    'note2-landscape': { safeTop: 0, safeBottom: 0, scale: 1.45, sec: 20 },
-    'note2-portrait': { safeTop: 0, safeBottom: 0, scale: 1.15, sec: 18 },
-    'tablet': { safeTop: 12, safeBottom: 12, scale: 1.25, sec: 20 },
-    'desktop': { safeTop: 0, safeBottom: 0, scale: 1.1, sec: 25 }
+    'note2-landscape': { safeTop: 0, safeBottom: 0, scale: 1.45 },
+    'note2-portrait': { safeTop: 0, safeBottom: 0, scale: 1.15 },
+    'tablet': { safeTop: 12, safeBottom: 12, scale: 1.25 },
+    'desktop': { safeTop: 0, safeBottom: 0, scale: 1.1 }
   };
   var $ = function (id) { return document.getElementById(id); };
   var currentPage = 'overview';
@@ -553,7 +563,8 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
       settings: {
         theme: 'dark', fontScale: 1, quoteSec: 180, companionSec: 600, habitSec: 3600,
         mode: 'screen', profile: 'auto', safeTop: 0, safeBottom: 0,
-        screenScale: 1.45, screenSec: 20, screenModules: ALL_MODULES.slice()
+        screenScale: 1.45, screenModules: ALL_MODULES.slice(),
+        startModule: 'quote'
       },
       idx: { quote: 0, companion: 0, habit: 0 },
       paused: { quote: false, companion: false, habit: false },
@@ -579,6 +590,7 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     if (s.settings.mode !== 'full') s.settings.mode = 'screen';
     if (!PROFILES[s.settings.profile] && s.settings.profile !== 'auto') s.settings.profile = 'auto';
     if (!s.settings.screenModules || !s.settings.screenModules.length) s.settings.screenModules = ALL_MODULES.slice();
+    if (ALL_MODULES.indexOf(s.settings.startModule) < 0) s.settings.startModule = 'quote';
     for (var t in d.idx) { if (s.idx[t] == null) s.idx[t] = 0; }
     for (var p in d.paused) { if (s.paused[p] == null) s.paused[p] = false; }
     if (!s.favs.quote) s.favs.quote = [];
@@ -678,10 +690,31 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
 
   /* ---------------- 信息屏（默认形态，极少互动） ---------------- */
 
+  var MODULE_SHORT = {
+    quote: '金句', companion: '伴读', rike: '日课',
+    habit: '习惯', sit: '静坐', archive: '档案'
+  };
   var screenOrder = ALL_MODULES.slice();
-  var screenAt = 0, screenElapsed = 0, screenPaused = false;
+  var screenAt = 0;
   var hintTimer = null, suppressClick = false, swiped = false, longTimer = null;
-  var touchX = 0, touchY = 0, tapCount = 0, singleTimer = null;
+  var touchX = 0, touchY = 0, swipedAt = 0;
+
+  // 信息屏是静态常亮屏：每次打开都停在「默认栏目」（金句），不记住上次栏目、不自动轮播。
+  function resetToStart() {
+    var i = screenOrder.indexOf(S.settings.startModule);
+    screenAt = i >= 0 ? i : 0;
+  }
+
+  function renderNav() {
+    var nav = $('scNav');
+    if (!nav) return;
+    var html = '';
+    for (var i = 0; i < screenOrder.length; i++) {
+      html += '<button type="button" data-go="' + i + '"' +
+        (i === screenAt ? ' class="active"' : '') + '>' + esc(MODULE_SHORT[screenOrder[i]] || '') + '</button>';
+    }
+    nav.innerHTML = html;
+  }
 
   function currentProfile() {
     var p = S.settings.profile;
@@ -694,7 +727,7 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     var p = PROFILES[currentProfile()];
     if (st.profile === 'auto' && !st.autoTuned) {
       st.safeTop = p.safeTop; st.safeBottom = p.safeBottom;
-      st.screenScale = p.scale; st.screenSec = p.sec;
+      st.screenScale = p.scale;
     }
     var root = document.documentElement;
     root.style.setProperty('--safe-top', Math.max(0, st.safeTop) + 'px');
@@ -706,7 +739,8 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
       if (st.screenModules.indexOf(ALL_MODULES[i]) >= 0) order.push(ALL_MODULES[i]);
     }
     screenOrder = order.length ? order : ALL_MODULES.slice();
-    if (screenAt >= screenOrder.length) screenAt = 0;
+    // 栏目顺序按配置固定，不做自动轮播；默认停在设定的栏目。
+    resetToStart();
     if (st.mode === 'screen') renderScreen();
   }
 
@@ -789,33 +823,35 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
 
   function renderScreen() {
     if (!screenOrder.length) screenOrder = ALL_MODULES.slice();
-    if (screenAt >= screenOrder.length) screenAt = 0;
+    if (screenAt >= screenOrder.length || screenAt < 0) screenAt = 0;
     var now = new Date();
     $('scDate').textContent = now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() +
       ' 日 · 星期' + weekText(now);
-    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
-      (screenPaused ? ' · 已暂停' : '');
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
     $('scBody').innerHTML = screenHtml(screenOrder[screenAt]);
-    $('scProgress').style.width = Math.round(screenElapsed / Math.max(1, S.settings.screenSec) * 100) + '%';
+    renderNav();
   }
 
+  // 手动切换栏目：左右滑动、点屏幕左右半区、点栏目名、键盘方向键。不自动轮播。
   function screenStep(delta) {
     if (!screenOrder.length) return;
     screenAt = (screenAt + delta + screenOrder.length) % screenOrder.length;
-    screenElapsed = 0;
     renderScreen();
     showHint();
   }
 
+  function screenGo(index) {
+    if (index < 0 || index >= screenOrder.length) return;
+    screenAt = index;
+    renderScreen();
+    showHint();
+  }
+
+  // 只走时钟与本地内容轮换，绝不自动切换栏目。
   function screenTick() {
     if (S.settings.mode !== 'screen') return;
     var now = new Date();
-    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
-      (screenPaused ? ' · 已暂停' : '');
-    if (screenPaused) return;
-    screenElapsed++;
-    if (screenElapsed >= Math.max(5, S.settings.screenSec)) { screenStep(1); }
-    else $('scProgress').style.width = Math.round(screenElapsed / Math.max(5, S.settings.screenSec) * 100) + '%';
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
   }
 
   function openConfig() {
@@ -823,7 +859,7 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     $('cfgTop').value = st.safeTop;
     $('cfgBottom').value = st.safeBottom;
     $('cfgScale').value = st.screenScale;
-    $('cfgSec').value = st.screenSec;
+    $('cfgStart').value = st.startModule;
     $('cfgTheme').value = st.theme;
     $('cfgMode').value = st.mode;
     var ps = $('cfgProfiles').getElementsByTagName('button');
@@ -833,21 +869,19 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     var mh = '';
     for (var m = 0; m < SCREEN_MODULES.length; m++) {
       var sm = SCREEN_MODULES[m];
-      mh += '<label><input type="checkbox" data-key="' + sm.key + '"' +
-        (st.screenModules.indexOf(sm.key) >= 0 ? ' checked' : '') + '>' + sm.label + '</label>';
+      mh += '<label title="' + esc(sm.label) + '"><input type="checkbox" data-key="' + sm.key + '"' +
+        (st.screenModules.indexOf(sm.key) >= 0 ? ' checked' : '') + '>' +
+        esc(MODULE_SHORT[sm.key] || sm.label) + '</label>';
     }
     $('cfgModules').innerHTML = mh;
     $('cfgMask').hidden = false;
     $('cfgPanel').hidden = false;
-    screenPaused = true;
     suppressClick = true;
   }
 
   function closeConfig() {
     $('cfgMask').hidden = true;
     $('cfgPanel').hidden = true;
-    screenPaused = false;
-    screenElapsed = 0;
     suppressClick = true;
     renderScreen();
   }
@@ -862,7 +896,8 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     st.safeTop = Math.min(240, Math.max(0, parseInt($('cfgTop').value, 10) || 0));
     st.safeBottom = Math.min(240, Math.max(0, parseInt($('cfgBottom').value, 10) || 0));
     st.screenScale = Math.min(1.8, Math.max(0.8, parseFloat($('cfgScale').value) || 1));
-    st.screenSec = Math.min(300, Math.max(5, parseInt($('cfgSec').value, 10) || 20));
+    st.startModule = $('cfgStart').value;
+    if (ALL_MODULES.indexOf(st.startModule) < 0) st.startModule = 'quote';
     st.theme = $('cfgTheme').value;
     st.mode = $('cfgMode').value;
     st.screenModules = mods.length ? mods : ALL_MODULES.slice();
@@ -1093,26 +1128,30 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
 
   function tick() {
     var now = Date.now();
-    var cfg = { quote: S.settings.quoteSec, companion: S.settings.companionSec, habit: S.settings.habitSec };
-    var changed = false;
-    var t;
-    for (t in cfg) {
-      if (!S.paused[t] && now - lastRun[t] >= cfg[t] * 1000) {
-        lastRun[t] = now;
-        var a = list(t), cur = S.idx[t] % (a.length || 1);
-        var n = cur + 1 + Math.floor(Math.random() * Math.max(1, a.length - 1));
-        S.idx[t] = a.length > 1 ? n % a.length : 0;
-        save();
-        changed = true;
+    // 信息屏是静态常亮屏：栏目不自动切换、内容不自动换新，只有时钟在走。
+    // 自动轮换仅在「完整交互」模式保留。
+    if (S.settings.mode !== 'screen') {
+      var cfg = { quote: S.settings.quoteSec, companion: S.settings.companionSec, habit: S.settings.habitSec };
+      var changed = false;
+      var t;
+      for (t in cfg) {
+        if (!S.paused[t] && now - lastRun[t] >= cfg[t] * 1000) {
+          lastRun[t] = now;
+          var a = list(t), cur = S.idx[t] % (a.length || 1);
+          var n = cur + 1 + Math.floor(Math.random() * Math.max(1, a.length - 1));
+          S.idx[t] = a.length > 1 ? n % a.length : 0;
+          save();
+          changed = true;
+        }
       }
-    }
-    if (changed && (currentPage === 'quote' || currentPage === 'companion' || currentPage === 'habit')) {
-      renderPage(currentPage);
-    }
-    if (currentPage === 'overview') {
-      $('ovNext').textContent = '金句 ' + mmss(cfg.quote - (now - lastRun.quote) / 1000) +
-        ' · 伴读 ' + mmss(cfg.companion - (now - lastRun.companion) / 1000);
-      $('ovUptime').textContent = Math.floor((now - bootAt) / 60000) + ' 分 ' + Math.floor((now - bootAt) / 1000 % 60) + ' 秒';
+      if (changed && (currentPage === 'quote' || currentPage === 'companion' || currentPage === 'habit')) {
+        renderPage(currentPage);
+      }
+      if (currentPage === 'overview') {
+        $('ovNext').textContent = '金句 ' + mmss(cfg.quote - (now - lastRun.quote) / 1000) +
+          ' · 伴读 ' + mmss(cfg.companion - (now - lastRun.companion) / 1000);
+        $('ovUptime').textContent = Math.floor((now - bootAt) / 60000) + ' 分 ' + Math.floor((now - bootAt) / 1000 % 60) + ' 秒';
+      }
     }
     if (sitRunning) {
       sitLeft--;
@@ -1126,11 +1165,11 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   }
 
   function bind() {
-    // 信息屏：轻触换屏、双击暂停、长按配置、左右滑动换屏
+    // 信息屏：左右滑动 / 点左右半区 / 点栏目名手动切换；长按配置。不自动轮播。
     var sc = $('screen');
     sc.addEventListener('touchstart', function (e) {
       var t = e.touches[0];
-      touchX = t.clientX; touchY = t.clientY; swiped = false;
+      touchX = t.clientX; touchY = t.clientY; swiped = false; suppressClick = false;
       if (longTimer) clearTimeout(longTimer);
       longTimer = setTimeout(function () { longTimer = null; openConfig(); }, 650);
     }, { passive: true });
@@ -1146,21 +1185,26 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
       if (swiped) {
         var t = e.changedTouches[0];
         if (Math.abs(t.clientX - touchX) > Math.abs(t.clientY - touchY)) screenStep(t.clientX < touchX ? 1 : -1);
+        swipedAt = Date.now();
         suppressClick = true;
       }
     }, { passive: true });
-    sc.addEventListener('click', function () {
-      if (suppressClick) { suppressClick = false; return; }
-      tapCount++;
-      if (tapCount === 1) {
-        singleTimer = setTimeout(function () { screenStep(1); tapCount = 0; singleTimer = null; }, 320);
-      } else if (tapCount === 2) {
-        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        screenPaused = !screenPaused;
-        renderScreen();
-        toast(screenPaused ? '轮播已暂停' : '轮播已继续');
-        tapCount = 0;
-      }
+    // 点击屏幕左半区 = 上一栏，右半区 = 下一栏（栏目条与配置按钮各自拦截）
+    sc.addEventListener('click', function (e) {
+      if (suppressClick || Date.now() - swipedAt < 400) { suppressClick = false; return; }
+      if (!$('cfgPanel').hidden) return;
+      var x = e.clientX;
+      if (x == null) x = window.innerWidth / 2;
+      screenStep(x < window.innerWidth / 2 ? -1 : 1);
+    });
+    // 栏目条：点栏目名直达，不触发左右半区逻辑
+    $('scNav').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (suppressClick || Date.now() - swipedAt < 400) { suppressClick = false; return; }
+      var btn = e.target;
+      while (btn && btn !== this && !btn.getAttribute('data-go')) btn = btn.parentNode;
+      if (!btn || btn === this) return;
+      screenGo(parseInt(btn.getAttribute('data-go'), 10));
     });
 
     $('cfgBtn').onclick = openConfig;
@@ -1179,7 +1223,6 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
           $('cfgTop').value = p.safeTop;
           $('cfgBottom').value = p.safeBottom;
           $('cfgScale').value = p.scale;
-          $('cfgSec').value = p.sec;
         };
       })(pbs[pi]);
     }
@@ -1188,9 +1231,8 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
       if (S.settings.mode !== 'screen' || !$('cfgPanel').hidden) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { screenStep(1); e.preventDefault(); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { screenStep(-1); e.preventDefault(); }
-      else if (e.key === ' ' || e.key === 'Enter') {
-        screenPaused = !screenPaused; renderScreen(); e.preventDefault();
-      } else if (e.key === 'c' || e.key === 'C') { openConfig(); }
+      else if (e.key === ' ' || e.key === 'Enter') { screenStep(1); e.preventDefault(); }
+      else if (e.key === 'c' || e.key === 'C') { openConfig(); }
     });
 
     $('themeBtn').onclick = function () {
@@ -1304,6 +1346,7 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     show: show, advance: advance, state: function () { return S; },
     screenNext: function () { screenStep(1); },
     screenPrev: function () { screenStep(-1); },
+    screenGo: screenGo,
     screenMode: function (on) {
       S.settings.mode = on ? 'screen' : 'full'; save(); applyScreenConfig(); renderScreen();
     },
@@ -1314,8 +1357,9 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
     config: function () {
       return {
         profile: currentProfile(), mode: S.settings.mode, safeTop: S.settings.safeTop,
-        safeBottom: S.settings.safeBottom, scale: S.settings.screenScale, sec: S.settings.screenSec,
-        order: screenOrder.slice(), at: screenAt, paused: screenPaused
+        safeBottom: S.settings.safeBottom, scale: S.settings.screenScale,
+        order: screenOrder.slice(), at: screenAt, module: screenOrder[screenAt],
+        start: S.settings.startModule, autoRotate: false
       };
     },
     openConfig: openConfig, closeConfig: closeConfig
