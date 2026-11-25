@@ -21,7 +21,7 @@ if not TOKEN:
 REPO = 'zhubao315/zhuocheng-terminal'
 BRANCH = 'main'
 ROOT = 'D:/tmp/workbuddy-data-cn/2026-11-23-09-54-19/phonebox/zhuocheng-terminal'
-MSG = 'v2.1.2 screen timers + hidden fix: '
+MSG = 'v2.1.2 reshots + archive layout fix: '
 
 FILES = [
     'CHANGELOG.md',
@@ -31,9 +31,14 @@ FILES = [
     'docs/offline.html',
     'docs/releases/zhuocheng-offline-2.0.apk',
     'releases/zhuocheng-offline-2.0.apk',
-    'web/offline/app.html',
+    'docs/screens/01-信息屏-每日金句.png',
+    'docs/screens/02-信息屏-AI伴读.png',
+    'docs/screens/03-信息屏-日课十二条.png',
+    'docs/screens/04-信息屏-微习惯.png',
+    'docs/screens/05-信息屏-静坐三省.png',
+    'docs/screens/06-信息屏-成长档案.png',
+    'docs/screens/07-多端配置.png',
     'web/offline/app.css',
-    'web/offline/app.js',
     'promotion/api_push_offline20.py',
 ]
 
