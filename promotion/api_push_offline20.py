@@ -1,4 +1,4 @@
-"""把全离线版 2.0 信息屏的改动通过 GitHub Contents API 推送（git 通道不可用时的兜底）。
+"""把全离线版 2.1 信息屏的改动通过 GitHub Contents API 推送（git 通道不可用时的兜底）。
 
 凭据从会话记录中读取，不在控制台打印。用法：python promotion/api_push_offline20.py
 """
@@ -21,7 +21,7 @@ if not TOKEN:
 REPO = 'zhubao315/zhuocheng-terminal'
 BRANCH = 'main'
 ROOT = 'D:/tmp/workbuddy-data-cn/2026-11-23-09-54-19/phonebox/zhuocheng-terminal'
-MSG = 'v2.0.1 info screen: '
+MSG = 'v2.1.0 manual info screen: '
 
 FILES = [
     'CHANGELOG.md',
@@ -42,6 +42,7 @@ FILES = [
     'promotion/screens/phone/README.md',
     'promotion/screen_device_shots.mjs',
     'promotion/screen_qa.mjs',
+    'promotion/screen_manual_qa.mjs',
     'promotion/api_push_offline20.py',
     'tools/build_offline_apk.py',
     'tools/build_offline_bundle.py',
