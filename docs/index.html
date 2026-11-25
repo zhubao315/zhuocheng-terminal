@@ -68,6 +68,21 @@
   .stat .t { margin-top: 4px; font-size: 13px; color: var(--sub); }
   @media (max-width: 640px) { h1 { font-size: 32px; } .stats { grid-template-columns: repeat(2, 1fr); } }
 
+  /* ---- promo video ---- */
+  .promo { margin-top: 48px; }
+  .promo .vframe {
+    position: relative; max-width: 860px; margin: 0 auto; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--line); background: #0a0d12; box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    aspect-ratio: 16 / 9;
+  }
+  .promo video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .promo .vtag {
+    position: absolute; top: 12px; left: 14px; font-size: 11px; letter-spacing: .2em;
+    color: var(--teal); background: rgba(10,13,18,.72); border: 1px solid rgba(94,200,180,.35);
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .promo .vmeta { text-align: center; color: var(--dim); font-size: 13px; margin-top: 12px; }
+
   /* ---- sections ---- */
   section { padding: 64px 0 8px; }
   .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 26px; }
@@ -156,6 +171,7 @@
 <nav>
   <div class="wrap">
     <span class="brand">拙诚日课终端 <b>·</b> ZhuoCheng Terminal</span>
+    <a class="sec" href="#film">影片</a>
     <a class="sec" href="#philosophy">理念</a>
     <a class="sec" href="#demo">展示</a>
     <a class="sec" href="#features">功能</a>
@@ -191,6 +207,17 @@
     <div class="stat"><div class="n">999</div><div class="t">AI 伴读 · 10 分钟一组</div></div>
     <div class="stat"><div class="n">12</div><div class="t">曾国藩日课 · 触屏打卡</div></div>
     <div class="stat"><div class="n">30</div><div class="t">微习惯 · 每小时轮换</div></div>
+  </div>
+
+  <div class="promo" id="film">
+    <div class="vframe">
+      <span class="vtag">PRODUCT FILM · 00:20</span>
+      <video controls playsinline preload="metadata" poster="media/promo-poster.jpg">
+        <source src="media/zhuocheng-promo.mp4" type="video/mp4">
+        你的浏览器不支持内嵌视频，<a href="media/zhuocheng-promo.mp4">点此下载观看</a>。
+      </video>
+    </div>
+    <div class="vmeta">20 秒产品宣传片 · 由 OpenMotion 工作流生成 · HTML/CSS 动画逐帧渲染</div>
   </div>
 </header>
 
