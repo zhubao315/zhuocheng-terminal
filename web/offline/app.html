@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f1318">
+<title>拙诚日课终端 · 全离线版 2.0</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">
+      <span class="seal">拙</span>
+      <div class="brand-text"><b>拙诚日课终端</b><small>ZHUOCHENG TERMINAL · OFFLINE 2.0</small></div>
+    </div>
+    <button id="themeBtn" class="ghost" type="button">日间</button>
+  </header>
+
+  <main id="main">
+    <section class="page" id="page-overview">
+      <div class="hero">
+        <div class="hero-top"><span id="ovDate">—</span><span class="pill"><i></i>纯离线 · 本地引擎</span></div>
+        <h1 id="ovTheme">今日主题 · —</h1>
+        <blockquote id="ovQuote">—</blockquote>
+        <div id="ovSource" class="source">—</div>
+      </div>
+      <div class="grid2">
+        <div class="card" onclick="ZC.show('rike')"><small>今日日课</small><b id="ovRike">0 / 12</b><div class="bar"><span id="ovRikeBar"></span></div><em>触屏打卡</em></div>
+        <div class="card" onclick="ZC.show('habit')"><small>当前微习惯</small><b id="ovHabit">—</b><em id="ovHabitMap">—</em></div>
+        <div class="card" onclick="ZC.show('sit')"><small>静坐三省</small><b id="ovSit">今日 0 次</b><em>回到自己</em></div>
+        <div class="card" onclick="ZC.show('archive')"><small>成长档案</small><b id="ovStreak">连续 0 天</b><em>本地留存</em></div>
+      </div>
+      <div class="card engine">
+        <small>中枢状态</small>
+        <div class="engine-row"><span>内容引擎</span><b>已内置 · 无需电脑</b></div>
+        <div class="engine-row"><span>金句 / 伴读</span><b id="ovCounts">999 / 999</b></div>
+        <div class="engine-row"><span>下次轮换</span><b id="ovNext">—</b></div>
+        <div class="engine-row"><span>本地运行</span><b id="ovUptime">—</b></div>
+      </div>
+      <p class="footnote">全部内容与记录都在本机。拔掉数据线、关掉电脑、断开网络，终端照常运行。</p>
+    </section>
+
+    <section class="page" id="page-quote" hidden>
+      <div class="page-head"><h2>每日金句</h2><span id="qIndex" class="counter">—</span></div>
+      <div class="quote-stage">
+        <blockquote id="qText" class="big-quote">—</blockquote>
+        <div id="qMeta" class="source">—</div>
+      </div>
+      <div class="controls">
+        <button id="qPrev" type="button">上一条</button>
+        <button id="qPause" class="primary" type="button">暂停</button>
+        <button id="qNext" type="button">下一条</button>
+      </div>
+      <div class="controls sub">
+        <button id="qFav" type="button">收藏</button>
+        <button id="qSmall" type="button">A−</button>
+        <button id="qLarge" type="button">A＋</button>
+      </div>
+      <p class="footnote" id="qNextInfo">每 180 秒自动换新；组内可随时暂停、翻阅、收藏。</p>
+    </section>
+
+    <section class="page" id="page-companion" hidden>
+      <div class="page-head"><h2>AI 伴读</h2><span id="cIndex" class="counter">—</span></div>
+      <div class="card reading">
+        <div id="cPassage" class="passage">—</div>
+        <div id="cSource" class="source">—</div>
+        <div class="divider"></div>
+        <small class="label">品读</small>
+        <p id="cInsight">—</p>
+        <div class="question"><small class="label">今日一问</small><p id="cQuestion">—</p></div>
+        <div class="action-line"><span id="cPractice">关联日课 · —</span><button id="cGoSit" class="ghost" type="button">去静坐</button></div>
+      </div>
+      <div class="controls">
+        <button id="cPrev" type="button">上一条</button>
+        <button id="cPause" class="primary" type="button">暂停</button>
+        <button id="cNext" type="button">下一条</button>
+      </div>
+      <div class="controls sub"><button id="cFav" type="button">收藏</button></div>
+      <p class="footnote" id="cNextInfo">每 600 秒自动换新。解读为构建期预生成，运行时不调用任何 API。</p>
+    </section>
+
+    <section class="page" id="page-rike" hidden>
+      <div class="page-head"><h2>日课十二条</h2><span id="rProgress" class="counter">0 / 12</span></div>
+      <div class="datebar">
+        <button id="rPrevDay" type="button">‹ 前一日</button>
+        <b id="rDate">—</b>
+        <button id="rNextDay" type="button">后一日 ›</button>
+      </div>
+      <div class="bar wide"><span id="rBar"></span></div>
+      <div id="rList" class="rike-grid"></div>
+      <div class="controls sub"><button id="rReset" type="button">清空当日</button><button id="rToday" type="button">回到今天</button></div>
+      <p class="footnote">点击条目即可勾选。每日记录保存在本机，不上传、不覆盖历史日期。</p>
+    </section>
+
+    <section class="page" id="page-habit" hidden>
+      <div class="page-head"><h2>微习惯</h2><span id="hCount" class="counter">—</span></div>
+      <div class="card habit-card">
+        <small class="label">此刻行动</small>
+        <p id="hText">—</p>
+        <div class="chips"><span id="hMap">—</span><span id="hDur">—</span><span id="hLevel">—</span></div>
+      </div>
+      <div class="controls">
+        <button id="hDone" class="primary" type="button">完成</button>
+        <button id="hLater" type="button">稍后</button>
+        <button id="hSkip" type="button">跳过</button>
+      </div>
+      <div class="controls sub"><button id="hNext" type="button">换一条</button><button id="hPause" type="button">暂停轮换</button></div>
+      <p class="footnote" id="hNextInfo">每小时换一条；完成后计入当日记录，可随时回看。</p>
+    </section>
+
+    <section class="page" id="page-sit" hidden>
+      <div class="page-head"><h2>静坐三省</h2><span id="sStatus" class="counter">未开始</span></div>
+      <div class="sit-stage">
+        <div id="sCircle" class="breath"><span id="sClock">00:00</span></div>
+        <p id="sHint">调匀呼吸，随圆圈起伏。走神了，轻轻回来。</p>
+      </div>
+      <div class="controls" id="sMins">
+        <button type="button" data-min="5">5 分钟</button>
+        <button class="primary" type="button" data-min="10">10 分钟</button>
+        <button type="button" data-min="15">15 分钟</button>
+        <button type="button" data-min="20">20 分钟</button>
+      </div>
+      <div class="controls">
+        <button id="sStart" class="primary" type="button">开始</button>
+        <button id="sPause" type="button">暂停</button>
+        <button id="sReset" type="button">重置</button>
+      </div>
+      <div class="card questions">
+        <small class="label">三省</small>
+        <label><input type="checkbox" id="sQ1"> 今日身心是否安住？</label>
+        <label><input type="checkbox" id="sQ2"> 哪一句话还挂在心上？</label>
+        <label><input type="checkbox" id="sQ3"> 明日最重要的一件事是什么？</label>
+        <textarea id="sNote" rows="3" placeholder="写下一句省身记录（可选，仅存本机）"></textarea>
+        <button id="sSave" class="primary wide-btn" type="button">保存本次静坐</button>
+      </div>
+    </section>
+
+    <section class="page" id="page-archive" hidden>
+      <div class="page-head"><h2>成长档案</h2><span class="counter">本地留存</span></div>
+      <div class="grid2">
+        <div class="card"><small>日课完成天数</small><b id="aDays">0</b></div>
+        <div class="card"><small>连续天数</small><b id="aStreak">0</b></div>
+        <div class="card"><small>微习惯完成</small><b id="aHabits">0</b></div>
+        <div class="card"><small>静坐次数 / 分钟</small><b id="aSits">0 / 0</b></div>
+      </div>
+      <div class="card">
+        <small class="label">近 7 日 · 日课</small>
+        <div id="aWeek"></div>
+      </div>
+      <div class="card">
+        <small class="label">收藏</small>
+        <div id="aFavs" class="favs">暂无收藏</div>
+      </div>
+      <div class="card">
+        <small class="label">导出（全部数据留在本机）</small>
+        <div class="controls sub">
+          <button id="aMd" type="button">导出 Markdown</button>
+          <button id="aJson" type="button">导出 JSON</button>
+        </div>
+        <textarea id="aOut" rows="4" readonly placeholder="导出内容会显示在这里，也可复制"></textarea>
+      </div>
+      <p class="footnote">档案只统计真实保存的记录；没有记录的日子不会生成结论。</p>
+    </section>
+  </main>
+
+  <nav id="tabs">
+    <button type="button" data-page="overview"><span>◎</span>总览</button>
+    <button type="button" data-page="quote"><span>句</span>金句</button>
+    <button type="button" data-page="companion"><span>读</span>伴读</button>
+    <button type="button" data-page="rike"><span>课</span>日课</button>
+    <button type="button" data-page="habit"><span>习</span>习惯</button>
+    <button type="button" data-page="sit"><span>静</span>静坐</button>
+    <button type="button" data-page="archive"><span>档</span>档案</button>
+  </nav>
+</div>
+<div id="toast"></div>
+<script>/*__DATA__*/</script>
+<script>/*__JS__*/</script>
+</body>
+</html>
