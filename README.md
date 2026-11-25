@@ -11,7 +11,7 @@
 
 **在线落地页（GitHub Pages）**：<https://zhubao315.github.io/zhuocheng-terminal/> · **全离线版演示**：<https://zhubao315.github.io/zhuocheng-terminal/offline.html> · **桥接版演示**：<https://zhubao315.github.io/zhuocheng-terminal/preview.html>
 
-**全离线 APK 下载**：<https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offline-2.0.apk>（v1+v2 双签，2,454,758 字节，SHA-256 `190c40816e1aadc3dd09972884275025ce9854bd4289f969ec3ebea2f762eba9`）
+**全离线 APK 下载**：<https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offline-2.0.apk>（v1+v2 双签，2,454,841 字节，SHA-256 `29f539b64821477f7d93031a770c8183fc8d5a797bcc96639996857dac07c8ec`）
 
 ## 命名与发布规范（三者统一）
 
