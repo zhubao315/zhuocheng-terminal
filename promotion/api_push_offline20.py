@@ -21,44 +21,20 @@ if not TOKEN:
 REPO = 'zhubao315/zhuocheng-terminal'
 BRANCH = 'main'
 ROOT = 'D:/tmp/workbuddy-data-cn/2026-11-23-09-54-19/phonebox/zhuocheng-terminal'
-MSG = 'v2.1.0 manual info screen: '
+MSG = 'v2.1.2 screen timers + hidden fix: '
 
 FILES = [
     'CHANGELOG.md',
     'README.md',
     'docs/index.html',
     'docs/07-releases.md',
-    'docs/08-offline-2.0.md',
     'docs/offline.html',
     'docs/releases/zhuocheng-offline-2.0.apk',
     'releases/zhuocheng-offline-2.0.apk',
-    'docs/screens/01-信息屏-每日金句.png',
-    'docs/screens/02-信息屏-AI伴读.png',
-    'docs/screens/03-信息屏-日课十二条.png',
-    'docs/screens/04-信息屏-微习惯.png',
-    'docs/screens/05-信息屏-静坐三省.png',
-    'docs/screens/06-信息屏-成长档案.png',
-    'docs/screens/07-多端配置.png',
-    'promotion/screens/phone/README.md',
-    'promotion/screen_device_shots.mjs',
-    'promotion/screen_qa.mjs',
-    'promotion/screen_manual_qa.mjs',
-    'promotion/api_push_offline20.py',
-    'tools/build_offline_apk.py',
-    'tools/build_offline_bundle.py',
     'web/offline/app.html',
     'web/offline/app.css',
     'web/offline/app.js',
-]
-
-DELETE = [
-    'docs/screens/01-终端总览.png',
-    'docs/screens/02-每日金句.png',
-    'docs/screens/03-AI伴读.png',
-    'docs/screens/04-日课打卡.png',
-    'docs/screens/05-微习惯.png',
-    'docs/screens/06-静坐三省.png',
-    'docs/screens/07-成长档案.png',
+    'promotion/api_push_offline20.py',
 ]
 
 
@@ -104,18 +80,5 @@ for rel in FILES:
         payload['sha'] = existing['sha']
     api(rel, 'PUT', payload)
     print('  ok', len(raw), 'bytes')
-
-for rel in DELETE:
-    print('deleting', rel)
-    existing = api(rel)
-    if not existing or 'sha' not in existing:
-        print('  already absent')
-        continue
-    api(rel, 'DELETE', {
-        'message': MSG + 'remove stale screenshot',
-        'sha': existing['sha'],
-        'branch': BRANCH,
-    })
-    print('  ok')
 
 print('ALL DONE')
