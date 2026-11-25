@@ -229,13 +229,15 @@ body:not(.screen-mode) #cfgBtn{bottom:100px}
   .sc-sit .breath{width:min(30vh,170px);height:min(30vh,170px)}
   .sc-sit .breath span{font-size:calc(24px * var(--screen-scale))}
   .sc-sit .sc-hintline{font-size:calc(13px * var(--screen-scale));margin-top:1vh}
-  .sc-stats{grid-gap:8px}
-  .sc-stat{padding:10px 8px}
-  .sc-stat small{font-size:calc(11px * var(--screen-scale))}
-  .sc-stat b{font-size:calc(28px * var(--screen-scale));margin-top:2px}
-  .sc-week{margin-top:1vh}
-  .sc-week .week-row{font-size:calc(11px * var(--screen-scale));margin-top:4px}
-  .sc-week .week-bar{height:8px}
+  /* 成长档案：矮屏下压缩统计卡与七日行，保证标题和最后一行不被裁切 */
+  .sc-archive .sc-kicker{margin-bottom:0.5vh}
+  .sc-stats{grid-gap:8px;margin-top:0.5vh}
+  .sc-stat{padding:6px 8px}
+  .sc-stat small{font-size:calc(10px * var(--screen-scale))}
+  .sc-stat b{font-size:calc(22px * var(--screen-scale));line-height:1.25;margin-top:1px}
+  .sc-week{margin-top:0.5vh}
+  .sc-week .week-row{font-size:calc(10px * var(--screen-scale));margin-top:2px}
+  .sc-week .week-bar{height:6px}
   /* 配置抽屉在矮屏上收紧；内容区独立滚动、按钮固定不遮挡 */
   .cfg-panel{padding:5px 10px 6px}
   .cfg-head{margin-bottom:0}
