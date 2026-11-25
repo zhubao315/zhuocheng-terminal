@@ -212,10 +212,14 @@
       <select id="cfgTheme"><option value="dark">夜间</option><option value="light">日间</option></select></label>
       <label>模式
       <select id="cfgMode"><option value="screen">信息屏（推荐）</option><option value="full">完整交互</option></select></label></div>
+    <div class="cfg-row"><label>金句换新（秒，0 关）
+      <input id="cfgQuoteSec" type="number" min="0" max="600" step="5"></label>
+      <label>伴读换新（秒，0 关）
+      <input id="cfgCompSec" type="number" min="0" max="600" step="5"></label></div>
 
     <small class="label">显示栏目（左右切换按此顺序）</small>
     <div id="cfgModules" class="cfg-modules"></div>
-    <p class="footnote">配置只存本机。信息屏默认停在「默认栏目」，不再自动轮播；左右滑动、点屏幕左右半区或点栏目名即可手动切换。顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
+    <p class="footnote">配置只存本机。信息屏默认停在「默认栏目」，栏目手动左右切换；停在金句/伴读时按对应秒数自动换新（0 为不换）。左右滑动、点屏幕左右半区或点栏目名即可手动切换。顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
     </div>
 
     <div class="cfg-actions">
