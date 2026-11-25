@@ -42,12 +42,25 @@ CERT_PEM = os.path.join(KEY_DIR, "signer_cert.pem")
 
 
 # ---------------------------------------------------------------- keys
+def cert_fingerprint(cert):
+    """发布记录中登记的签名身份：证书 DER 的 SHA-256 指纹。"""
+    return cert.fingerprint(hashes.SHA256()).hex()
+
+
 def load_or_create_keys():
     os.makedirs(KEY_DIR, exist_ok=True)
-    if os.path.exists(KEY_PEM) and os.path.exists(CERT_PEM):
+    has_key, has_cert = os.path.exists(KEY_PEM), os.path.exists(CERT_PEM)
+    if has_key != has_cert:
+        raise SystemExit(
+            f"签名密钥不完整（key={has_key}, cert={has_cert}）：拒绝自动生成新身份。\n"
+            f"请从加密备份恢复缺失文件到 {KEY_DIR}，否则新 APK 将无法覆盖安装旧版本。"
+        )
+    if has_key and has_cert:
         key = serialization.load_pem_private_key(open(KEY_PEM, "rb").read(), password=None)
         cert = x509.load_pem_x509_certificate(open(CERT_PEM, "rb").read())
-        print("keys loaded:", KEY_DIR)
+        if key.public_key().public_numbers() != cert.public_key().public_numbers():
+            raise SystemExit("签名密钥与证书公钥不匹配，已停止签名。")
+        print("keys loaded:", KEY_DIR, "fingerprint(sha256):", cert_fingerprint(cert))
         return key, cert
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([
@@ -66,7 +79,7 @@ def load_or_create_keys():
     open(KEY_PEM, "wb").write(key.private_bytes(
         serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
     open(CERT_PEM, "wb").write(cert.public_bytes(serialization.Encoding.PEM))
-    print("keys generated & saved:", KEY_DIR)
+    print("keys generated & saved:", KEY_DIR, "fingerprint(sha256):", cert_fingerprint(cert))
     return key, cert
 
 
@@ -288,6 +301,9 @@ def b64p(b): return base64.b64encode(b).decode()[:24] + "..."
 def main():
     args = sys.argv[1:]
     key, cert = load_or_create_keys()
+    if args and args[0] == "--fingerprint":
+        print("SHA-256:", cert_fingerprint(cert))
+        return
     if args and args[0] == "--verify":
         verify_v2(args[1], key, cert)
         return

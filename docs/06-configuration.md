@@ -7,8 +7,9 @@
 | 变量 | 默认 | 说明 |
 |---|---|---|
 | `PHONEBOX_API` | `http://127.0.0.1:8765` | PhoneBox Agent 本地 API |
-| `PHONEBOX_ADB` | `<工作区>/flash-hermes/platform-tools/adb.exe` | adb 可执行文件路径 |
+| `PHONEBOX_ADB` | `adb` | adb 可执行文件路径 |
 | `PHONEBOX_WIFI_ADB` | `192.168.1.66:5555` | WiFi adb 地址（拔线采集） |
+| `PHONEBOX_DEVICE_SERIAL` | 空（自动） | 指定目标设备序列号；多设备（USB+WiFi）时必填，所有 adb 命令统一带 `-s` |
 | `PHONEBOX_DATA_DIR` | 脚本所在目录 | 语料/状态/记录目录 |
 | `HEARTBEAT_INTERVAL` | `30` | 心跳周期（秒） |
 | `QUOTE_INTERVAL` | `180` | 金句组轮换（秒，每组 10 句） |

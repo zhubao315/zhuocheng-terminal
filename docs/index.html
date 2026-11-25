@@ -51,6 +51,14 @@
     border: 1px solid var(--line); color: var(--sub); background: var(--card);
   }
   .badge.hot { color: var(--amber); border-color: rgba(245,180,94,.4); }
+  .cta { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cta a {
+    display: inline-block; padding: 12px 26px; border-radius: 8px; font-size: 14px;
+    text-decoration: none; letter-spacing: .06em; border: 1px solid var(--line);
+    color: var(--ink); background: var(--card);
+  }
+  .cta a.primary { background: var(--amber); color: #1b1711; border-color: var(--amber); font-weight: 700; }
+  .cta a:hover { opacity: .85; }
   .stats { margin-top: 44px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .stat {
     background: var(--card); border: 1px solid var(--line); border-radius: 14px;
@@ -173,9 +181,14 @@
     <span class="badge">PHONEBOX</span>
     <span class="badge">MIT LICENSE</span>
   </div>
+  <div class="cta">
+    <a class="primary" href="preview.html">在线体验 →</a>
+    <a href="releases/zhuocheng-terminal-v2signed.apk" download>下载 APK（2.36 MB）</a>
+    <a href="https://github.com/zhubao315/zhuocheng-terminal" target="_blank" rel="noopener">查看源码 ↗</a>
+  </div>
   <div class="stats">
-    <div class="stat"><div class="n">999</div><div class="t">每日金句 · 10s 轮换</div></div>
-    <div class="stat"><div class="n">999</div><div class="t">AI 伴读 · 30s 轮换</div></div>
+    <div class="stat"><div class="n">999</div><div class="t">每日金句 · 3 分钟一组</div></div>
+    <div class="stat"><div class="n">999</div><div class="t">AI 伴读 · 10 分钟一组</div></div>
     <div class="stat"><div class="n">12</div><div class="t">曾国藩日课 · 触屏打卡</div></div>
     <div class="stat"><div class="n">30</div><div class="t">微习惯 · 每小时轮换</div></div>
   </div>
@@ -201,7 +214,7 @@
     <div class="card">
       <div class="zh">日日精进</div>
       <div class="en">DAILY IMPROVEMENT</div>
-      <p>金句 10 秒、伴读 30 秒、微习惯每小时——让正确的信息在正确的时辰出现。</p>
+      <p>金句 3 分钟一组、伴读 10 分钟一组、微习惯每小时——组内可暂停翻阅，不被强制打断；演示模式另有 10/30 秒快速轮播。</p>
     </div>
   </div>
 </section>
@@ -223,12 +236,12 @@
   <div class="scroll-x">
   <table>
     <tr><th>模块</th><th>节奏</th><th>说明</th></tr>
-    <tr><td><b>每日金句</b></td><td>10 秒随机换（不与上一条重复）</td><td>999 条、30+ 来源；品读模式展示主题出处 + 时辰宜事，支持暂停 / 上句 / 下句</td></tr>
-    <tr><td><b>AI 伴读</b></td><td>30 秒随机换</td><td>999 条自包含条目：原文 + 解读 + 今日一问 + 关联日课；单屏分层阅读器</td></tr>
+    <tr><td><b>每日金句</b></td><td>日常 3 分钟一组 10 句；演示 10 秒</td><td>999 条、43 个来源；品读模式展示主题出处 + 时辰宜事，支持暂停 / 上句 / 下句</td></tr>
+    <tr><td><b>AI 伴读</b></td><td>日常 10 分钟一组 5 条；演示 30 秒</td><td>999 条自包含条目：原文 + 解读 + 今日一问 + 关联日课；单屏分层阅读器</td></tr>
     <tr><td><b>日课打卡</b></td><td>触屏勾选，每日自动重置</td><td>曾国藩日课十二条，双列清单；15 分钟轮换修行提醒</td></tr>
-    <tr><td><b>微习惯</b></td><td>每小时随机换</td><td>30 条 2 分钟可完成的微习惯，逐条映射日课条目</td></tr>
-    <tr><td><b>定时中枢</b></td><td>30 秒心跳</td><td>六任务解耦调度、内容哈希变更推送、指数退避；电量与环境光等硬件采集</td></tr>
-    <tr><td><b>成长档案</b></td><td>按日持久化</td><td><code class="inline">records/YYYY-MM-DD.json</code> 记录每日推送与打卡轨迹（带容量限流）</td></tr>
+    <tr><td><b>微习惯</b></td><td>每小时随机换</td><td>30 条微习惯逐条标注真实时长（1–20 分钟），逐条映射日课条目</td></tr>
+    <tr><td><b>定时中枢</b></td><td>30 秒心跳</td><td>六任务解耦调度、内容哈希变更推送、按推送键独立指数退避；电量与环境光采集</td></tr>
+    <tr><td><b>成长档案</b></td><td>按日持久化</td><td><code class="inline">records/YYYY-MM-DD.json</code> 记录每日推送与送达状态；勾选状态存于手机端，当前 Agent 接口不支持回读</td></tr>
   </table>
   </div>
 </section>
@@ -309,6 +322,14 @@ records/YYYY-MM-DD.json 每日档案 · CLI（once / dry-run / check / doctor）
 <section id="install">
   <div class="sec-head"><span class="sec-no">07</span><h2>快速安装</h2></div>
   <div class="step">
+    <div class="no">0</div>
+    <div class="body">
+      <h3>安装终端 APK（可选，先装手机端）</h3>
+      <p><a href="releases/zhuocheng-terminal-v2signed.apk" download><b>下载 v1+v2 双签名 APK · 2,360,405 字节</b></a>　SHA-256：<code class="inline">fade370b9f5946aeb39c8afd6381e81bea771f3174b121c3b742637e03dc94f6</code></p>
+      <p>已在 Android 9（LineageOS 16 / 红米 Note 2）验证；v2 签名满足 Android 11+ 要求。小米 HyperOS 等系统的侧载检测可能拒绝安装，可用 adb 直装。详见 <a href="07-releases.md">发布与校验说明</a>。</p>
+    </div>
+  </div>
+  <div class="step">
     <div class="no">1</div>
     <div class="body">
       <h3>克隆仓库</h3>
@@ -329,7 +350,7 @@ python setup_overview.py      <span class="c"># 总览页 + 六个页面组件�
     <div class="body">
       <h3>启动中枢</h3>
 <pre>python daily_hub.py           <span class="c"># 常驻心跳（默认）</span>
-python daily_hub.py doctor    <span class="c"># 环境自检</span>
+python daily_hub.py --doctor  <span class="c"># 环境自检</span>
 python manage.py start        <span class="c"># 或用管理器后台运行</span></pre>
       <p>更多选项见 <a href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/03-install.md" target="_blank" rel="noopener">安装指南</a> 与 <a href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/06-configuration.md" target="_blank" rel="noopener">配置手册</a>。</p>
     </div>
@@ -346,6 +367,7 @@ python manage.py start        <span class="c"># 或用管理器后台运行</spa
     <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/04-audit-report.md" target="_blank" rel="noopener"><b>04 · 审计报告</b><span>v1.1 稳定性审计结论</span></a>
     <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/05-improvement-roadmap.md" target="_blank" rel="noopener"><b>05 · 路线图</b><span>V1.1 → V2.0 演进计划</span></a>
     <a class="card" href="https://github.com/zhubao315/zhuocheng-terminal/blob/main/docs/06-configuration.md" target="_blank" rel="noopener"><b>06 · 配置手册</b><span>全部环境变量与轮换节奏</span></a>
+    <a class="card" href="07-releases.md"><b>07 · 发布与校验</b><span>APK 摘要、签名指纹、兼容范围与安装排错</span></a>
   </div>
   <div class="card">
     <h3>许可</h3>

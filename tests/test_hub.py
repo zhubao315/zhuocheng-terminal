@@ -110,6 +110,12 @@ class TestPusher(unittest.TestCase):
         p.fail_streak = 10
         self.assertEqual(p.backoff(10), 40)  # 封顶 4 倍
 
+    def test_per_key_backoff_isolated(self):
+        p = dh.Pusher("http://127.0.0.1:9", dry_run=True)
+        p._fail_streaks = {"micro-habit": 2, "rike-reminder": 0}
+        self.assertEqual(p.backoff(10, "micro-habit"), 40)
+        self.assertEqual(p.backoff(10, "rike-reminder"), 10)
+
 
 class TestDailyRecords(unittest.TestCase):
     def setUp(self):
@@ -180,14 +186,27 @@ class TestConfig(unittest.TestCase):
 
 
 class TestCorpus(unittest.TestCase):
+    def setUp(self):
+        # 语料在仓库根 data/ 下；不再回退到空临时目录（那会让测试空跑通过）
+        self.corpus = dh.Corpus(TESTS_DIR.parent / "data")
+
     def test_load_real_corpus(self):
-        c = dh.Corpus(Path(__file__).resolve().parent.parent if (TESTS_DIR.parent / "quotes.json").exists()
-                      else Path(_TMP))
-        n = len(c.quotes())
-        # 工作区/仓库均有 999 条语料；测试目录为空时允许 0
-        self.assertGreaterEqual(n, 0)
-        if n:
-            self.assertEqual(n, 999)
+        self.assertEqual(len(self.corpus.quotes()), 999)
+        self.assertEqual(len(self.corpus.companions()), 999)
+        self.assertEqual(len(self.corpus.habits()), 30)
+        self.assertEqual(len(self.corpus.reminders()), 12)
+
+    def test_companion_passages_match_quotes(self):
+        texts = {q["text"] for q in self.corpus.quotes()}
+        for c in self.corpus.companions():
+            self.assertIn(c["passage"], texts)
+
+    def test_microhabit_durations_declared(self):
+        for h in self.corpus.habits():
+            self.assertIn("duration_minutes", h)
+            self.assertGreaterEqual(h["duration_minutes"], 1)
+            self.assertLessEqual(h["duration_minutes"], 60)
+
 
 
 if __name__ == "__main__":

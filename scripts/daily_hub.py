@@ -52,8 +52,6 @@ from pathlib import Path
 VERSION = "2.0.0"
 
 BASE = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE))
-import ai_companion  # noqa: E402
 
 
 def _env(name, default, cast=str):
@@ -65,6 +63,7 @@ CFG = {
     "api": _env("PHONEBOX_API", "http://127.0.0.1:8765"),
     "adb": _env("PHONEBOX_ADB", "adb"),
     "wifi": _env("PHONEBOX_WIFI_ADB", "192.168.1.66:5555"),
+    "device_serial": _env("PHONEBOX_DEVICE_SERIAL", ""),
     "data_dir": Path(_env("PHONEBOX_DATA_DIR", str(BASE.parent / "data"))),
     "heartbeat": _env("HEARTBEAT_INTERVAL", 30, int),
     "quote": _env("QUOTE_INTERVAL", 180, int),
@@ -203,8 +202,11 @@ def ensure_wifi_device():
 
 
 def adb(*args):
+    """所有 adb shell 统一带 -s 目标设备；未指定时才走 adb 默认选择。"""
+    serial = CFG["device_serial"] or device_serial()
+    cmd = [CFG["adb"]] + (["-s", serial] if serial else []) + ["shell", *args]
     try:
-        r = subprocess.run([CFG["adb"], "shell", *args], capture_output=True, text=True, timeout=8)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
         return r.stdout.strip()
     except Exception:
         return ""
@@ -213,10 +215,18 @@ def adb(*args):
 def device_serial():
     try:
         r = subprocess.run([CFG["adb"], "devices"], capture_output=True, text=True, timeout=5)
+        online = set()
         for line in r.stdout.splitlines()[1:]:
             line = line.strip()
             if line.endswith("\tdevice"):
-                return line.split("\t")[0]
+                online.add(line.split("\t")[0])
+        want = CFG["device_serial"]
+        if want:
+            return want if want in online else None  # 指定设备不在线 → 绝不回退到别的设备
+        if len(online) == 1:
+            return next(iter(online))
+        if len(online) > 1:
+            log.warning("检测到 %s 台设备，请设置 PHONEBOX_DEVICE_SERIAL 指定目标", len(online))
     except Exception:
         pass
     return None
@@ -259,8 +269,16 @@ class Pusher:
         self.api = api
         self.dry_run = dry_run
         self.last_hash = {}
-        self.fail_streak = 0
+        self._fail_streaks = {}          # 每个推送键独立退避，互不掩盖
         self.dry_log = []
+
+    @property
+    def fail_streak(self):
+        return max(self._fail_streaks.values(), default=0)
+
+    @fail_streak.setter
+    def fail_streak(self, value):
+        self._fail_streaks = {"*": value}
 
     def push(self, key, payload, force=False):
         body = json.dumps(payload, ensure_ascii=False, sort_keys=True)
@@ -284,14 +302,15 @@ class Pusher:
             ok = False
         if ok:
             self.last_hash[key] = h
-            self.fail_streak = 0
+            self._fail_streaks[key] = 0
         else:
-            self.fail_streak += 1
+            self._fail_streaks[key] = self._fail_streaks.get(key, 0) + 1
         return ok
 
-    def backoff(self, base):
-        """API 连续失败时放大等待（最多 4 倍）。"""
-        return base * min(2 ** self.fail_streak, 4) if self.fail_streak else base
+    def backoff(self, base, key=None):
+        """API 连续失败时放大等待（最多 4 倍）；按推送键独立计数。"""
+        streak = (self._fail_streaks.get(key, 0) if key else self.fail_streak)
+        return base * min(2 ** streak, 4) if streak else base
 
 
 # ---------------------------------------------------------------- 每日记录
@@ -317,8 +336,9 @@ class DailyRecords:
                 rec = {"date": day}
         else:
             rec = {"date": day}
-        rec.setdefault("quotes_batches", 0)
-        rec.setdefault("quotes_read", 0)
+        rec.setdefault("quotes_batches", 0)      # 当日金句组数（跨日归零）
+        rec.setdefault("quote_items_sent", 0)    # 当日成功送达的金句条数
+        rec.setdefault("quotes_read", 0)         # 兼容旧字段
         rec.setdefault("habits_shown", [])
         rec.setdefault("reminders_shown", [])
         rec.setdefault("hardware", [])
@@ -404,10 +424,8 @@ class Corpus:
         return self._load("rike_reminders.json") or []
 
     def companions(self):
-        try:
-            return ai_companion.load_companions()
-        except Exception:
-            return []
+        # 与金句一样从本 Corpus 的 data_dir 读取，避免受全局 DATA_DIR/测试环境漂移影响
+        return self._load("companion.json") or []
 
 
 # ---------------------------------------------------------------- 状态与单实例
@@ -548,7 +566,8 @@ class Hub:
         self.tag_cache = {}
         self.recent_quotes = deque(maxlen=20)
         self.recent_companions = deque(maxlen=15)
-        self.quote_batch_no = self.state.get("quote_batch_no", 0)
+        self.quote_batch_no = self.state.get("quote_batch_no", 0)        # 全局累计（不用于展示）
+        self.companion_batch_no = self.state.get("companion_batch_no", 0)
         self.next_run = {k: 0.0 for k in ("heartbeat", "quote", "companion", "microhabit", "hardware", "reminder")}
         self._next = {}
 
@@ -573,24 +592,35 @@ class Hub:
         self.quote_batch_no += 1
         items = [{"text": quotes[i]["text"], "source": quotes[i]["source"],
                   "tag": quote_tag(quotes[i]["text"]), "genre": quote_genre(quotes[i]["source"])} for i in idxs]
-        self.pusher.push(QUOTE_BATCH_KEY, {"batch_no": self.quote_batch_no, "period": period_name(), "items": items})
+        ok_batch = self.pusher.push(QUOTE_BATCH_KEY,
+                                    {"batch_no": self.quote_batch_no, "period": period_name(), "items": items})
         head = items[0]
         ok1 = self.pusher.push(QUOTE_KEY, {"value": head["text"], "sub": head["source"], "title": "每日金句", "icon": "quote"})
-        rec = self.records.update(quotes_batches=self.quote_batch_no, quotes_read=self.records_quote_count())
-        meta_ok = self.pusher.push(QUOTE_META_KEY, {
+        # 全局批次号只用于 push payload；每日记录必须是当日真实组数（跨日归零）
+        today_rec, _ = self.records._load(datetime.now().strftime("%Y-%m-%d"))
+        daily_batches = today_rec["quotes_batches"] + 1
+        delivered = ok_batch and ok1
+        rec = self.records.update(
+            quotes_batches=daily_batches,
+            quote_items_sent=today_rec["quote_items_sent"] + (len(items) if delivered else 0),
+            quotes_read=daily_batches,
+            events={"event_type": "quote_batch", "item_id": self.quote_batch_no,
+                    "status": "delivered" if delivered else "failed", "count": len(items)})
+        self.pusher.push(QUOTE_META_KEY, {
             "value": f"主题：{head['tag']} · {head['genre']}",
             "sub": f"今日已推 {rec['quotes_batches']} 组 · 组内可自由翻阅",
             "title": "金句语境", "icon": "tag"})
         label, yi, tip = hour_rite()
-        ok_h = self.pusher.push(QUOTE_HOUR_KEY, {"value": f"{label} · {yi}", "sub": tip, "title": "时辰宜事", "icon": "clock"})
+        self.pusher.push(QUOTE_HOUR_KEY, {"value": f"{label} · {yi}", "sub": tip, "title": "时辰宜事", "icon": "clock"})
         self.state["quote_idx"] = idxs[0]
         self.state["quote_batch_no"] = self.quote_batch_no
-        log.info("金句组#%s %s句 推%s", self.quote_batch_no, len(items), "√" if ok1 else "×")
+        log.info("金句组#%s 今日第%s组 %s句 推%s", self.quote_batch_no, daily_batches, len(items),
+                 "√" if delivered else "×")
 
     def records_quote_count(self):
-        day = datetime.now().strftime("%Y-%m-%d")
-        rec, _ = self.records._load(day)
-        return rec["quotes_batches"]
+        """当日成功送达的金句条数（不是全局批次号）。"""
+        rec, _ = self.records._load(datetime.now().strftime("%Y-%m-%d"))
+        return rec["quote_items_sent"]
 
     def t_companion(self):
         comps = self.corpus.companions()
@@ -607,8 +637,11 @@ class Hub:
             c = comps[i]
             items.append({"passage": c["passage"], "source": c["source"], "insight": c["insight"],
                           "question": c["question"], "practice": c["practice"], "tag": c["tag"]})
-        self.pusher.push(COMPANION_BATCH_KEY, {"batch_no": self.quote_batch_no, "items": items})
-        log.info("伴读组 %s条 %s", len(items), [comps[i]["source"] for i in idxs[:2]])
+        self.companion_batch_no += 1
+        ok = self.pusher.push(COMPANION_BATCH_KEY, {"batch_no": self.companion_batch_no, "items": items})
+        self.state["companion_batch_no"] = self.companion_batch_no
+        log.info("伴读组#%s %s条 %s %s", self.companion_batch_no, len(items),
+                 [comps[i]["source"] for i in idxs[:2]], "√" if ok else "×")
 
     def t_microhabit(self):
         habits = self.corpus.habits()
@@ -616,10 +649,13 @@ class Hub:
             return
         midx = random.randrange(len(habits))
         h = habits[midx]
+        minutes = h.get("duration_minutes", 2)   # 逐条标注真实时长，不再统一承诺「2 分钟」
         ok = self.pusher.push(MICRO_KEY, {
-            "value": h["habit"], "sub": f"对应日课：{h['maps']} · 2 分钟即可",
+            "value": h["habit"], "sub": f"对应日课：{h['maps']} · 约 {minutes} 分钟",
             "title": "今日微习惯", "icon": "target"})
-        self.records.update(habits_shown={"idx": midx, "name": h["habit"]})
+        self.records.update(
+            habits_shown={"idx": midx, "name": h["habit"], "status": "delivered" if ok else "failed"},
+            events={"event_type": "microhabit", "item_id": midx, "status": "delivered" if ok else "failed"})
         self.state["micro_idx"] = midx
         self.state["micro_date"] = datetime.now().strftime("%Y-%m-%d")
         log.info("微习惯[%s]%s", midx, "√" if ok else "×")
@@ -632,8 +668,10 @@ class Hub:
         r = reminders[ridx]
         ok = self.pusher.push(RIKE_KEY, {
             "value": f"{r['name']} · {r['remind']}",
-            "sub": f"2 分钟做法：{r['how']}", "title": "日课提醒", "icon": "bell"})
-        self.records.update(reminders_shown={"idx": ridx, "name": r["name"]})
+            "sub": f"做法：{r['how']}", "title": "日课提醒", "icon": "bell"})
+        self.records.update(
+            reminders_shown={"idx": ridx, "name": r["name"], "status": "delivered" if ok else "failed"},
+            events={"event_type": "reminder", "item_id": ridx, "status": "delivered" if ok else "failed"})
         self.state["rike_idx"] = ridx
         log.info("日课提醒[%s]%s", ridx, "√" if ok else "×")
 
@@ -651,9 +689,16 @@ class Hub:
             "value": f"{level}%", "sub": f"{temp} · {status}", "title": "手机电量", "icon": "battery",
             "level": "warn" if level.isdigit() and int(level) < 20 else "ok"}, force=True)
         light, screen, bright = read_sensors()
+        # 三态：supported（读到真实值）/ unavailable（设备无能力）/ error（读失败），不用「?」冒充数值
+        got_battery, got_light = level.isdigit(), light != "?"
+        hw_status = "supported" if got_battery and got_light else (
+            "error" if got_battery or got_light else "unavailable")
+        label = {"supported": "已采集", "unavailable": "设备不支持", "error": "采集失败"}[hw_status]
         self.pusher.push(SENSOR_KEY, {
-            "value": light, "sub": f"亮度{bright} · {screen}", "title": "环境感知", "icon": "light"}, force=True)
-        self.records.update(hardware={"level": level, "temp": temp, "status": status, "light": light})
+            "value": light if got_light else "—", "sub": f"{label} · 亮度{bright} · {screen}",
+            "title": "环境感知", "icon": "light"}, force=True)
+        self.records.update(hardware={"level": level, "temp": temp, "status": status,
+                                      "light": light, "sensor_status": hw_status})
         self.state["last_hw"] = datetime.now().strftime("%H:%M")
         log.info("硬件 %s%% %s %s", level, temp, self.conn)
 
@@ -666,9 +711,10 @@ class Hub:
         habits = self.corpus.habits()
         reminders = self.corpus.reminders()
         fail_txt = f" · ⚠推送连续失败{self.pusher.fail_streak}" if self.pusher.fail_streak else ""
+        today_rec, _ = self.records._load(today)
         self.pusher.push(INFO_KEY, {
             "value": f"已运行 {fmt_uptime()} · 今日心跳 {pushes_today} 次{fail_txt}",
-            "sub": f"{self.conn or '设备离线'} · 金句组 {self.quote_batch_no} · 时段 {period_name()} · 微习惯 {(self.state.get('micro_idx', 0) + 1)}/{len(habits)} · 提醒 {(self.state.get('rike_idx', 0) + 1)}/{len(reminders)} · 硬件 {self.state.get('last_hw', '—')}",
+            "sub": f"{self.conn or '设备离线'} · 今日金句 {today_rec['quotes_batches']} 组 / {today_rec['quote_items_sent']} 句 · 时段 {period_name()} · 微习惯 {(self.state.get('micro_idx', 0) + 1)}/{len(habits)} · 提醒 {(self.state.get('rike_idx', 0) + 1)}/{len(reminders)} · 硬件 {self.state.get('last_hw', '—')}",
             "title": "中枢心跳", "icon": "pulse"}, force=True)
 
     def run_once(self, dry=False):

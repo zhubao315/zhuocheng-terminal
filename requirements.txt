@@ -1,0 +1,5 @@
+# 中枢运行：仅标准库，无第三方依赖（Python 3.8+）
+# 以下依赖仅构建 / 发布时需要，运行时可不安装
+
+cryptography>=41        # scripts/sign_apk_v2.py（v1+v2 签名与校验）
+Pillow>=10              # tools/build_zhuocheng_apk.py（图标 PNG 处理）
