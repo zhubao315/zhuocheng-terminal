@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""拙诚日课终端 · 语料校验器
+"""拙诚日课 · 语料校验器
 
 校验 data/quotes.json 与 data/companion.json：
   1. 数量 = 999

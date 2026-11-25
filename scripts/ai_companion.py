@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""拙诚日课终端 · AI 伴读
+"""拙诚日课 · AI 伴读
 
 companion.json 为自包含条目库（原文+解读+思考题），按索引推送到 PhoneBox。
 内容预生成，不依赖 API key、不联网。支持随机轮播（中枢每 30 秒调用一次）。

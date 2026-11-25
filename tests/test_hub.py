@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""拙诚日课终端 · 中枢单元测试（不依赖真机）
+"""拙诚日课 · 中枢单元测试（不依赖真机）
 
 运行： python -X utf8 -m unittest discover tests -v
 """

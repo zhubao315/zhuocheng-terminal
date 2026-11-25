@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""拙诚日课终端 · 统一运维入口
+"""拙诚日课 · 统一运维入口
 
 命令：
   python scripts/manage.py doctor    # 完整诊断（环境/数据/设备/磁盘）

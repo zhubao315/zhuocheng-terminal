@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "拙诚日课终端 · AI 伴读内容库",
+    "name": "拙诚日课 · AI 伴读内容库",
     "note": "999 条自包含条目（passage+source+insight 内嵌），独立于金句库随机轮播，中枢每 30 秒换一条。解读由构建器按主题族语池预生成（种子固定、可复现），不依赖 API key 或网络。",
     "push_keys": {
       "passage": "ai-passage",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "拙诚日课终端 · 微习惯库",
+    "name": "拙诚日课 · 微习惯库",
     "note": "逐条标注真实时长；界面按 duration_minutes 显示，不再统一标注 2 分钟",
     "push_key": "micro-habit"
   },

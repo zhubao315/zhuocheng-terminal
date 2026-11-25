@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""拙诚日课终端 · 总览页 + 全局字号 + 日课两列，一键部署。
+"""拙诚日课 · 总览页 + 全局字号 + 日课两列，一键部署。
 
 零依赖，走 PhoneBox 本地 API，无需重启 Agent：
   GET  /api/settings          读配置
@@ -40,7 +40,7 @@ OVERVIEW_HTML = """<style>
   .tile .ds{font-size:clamp(10px,1.7vh,18px);color:#8a94a3}
 </style>
 <div class="wrap">
-  <div class="head"><b>拙诚日课终端</b><span>· 五阶段 · 触屏切换</span></div>
+  <div class="head"><b>拙诚日课</b><span>· 五阶段 · 触屏切换</span></div>
   <div class="grid">
     <button class="tile" data-go="rike"><span class="ic">💬</span><span class="nm">每日金句</span><span class="ds">品读模式 · 暂停/上下句</span></button>
     <button class="tile" data-go="checkin"><span class="ic">✅</span><span class="nm">日课打卡</span><span class="ds">十二条目 · 两列勾选</span></button>

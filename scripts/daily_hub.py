@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""拙诚日课终端 · 定时中枢 v2（调度解耦版）
+"""拙诚日课 · 定时中枢 v2（调度解耦版）
 
 设计原则（对应 docs/04 审计报告的 P0 整改）：
   1. 心跳 / 内容轮换 / 硬件采集解耦为独立任务，各拥独立周期（不再绑在同一个 10 秒循环）。
@@ -513,7 +513,7 @@ def run_check(data_dir, verbose=False):
 
 def run_doctor(data_dir):
     """完整诊断：体检 + 设备 + 记录目录 + 磁盘。"""
-    print("== 拙诚日课终端 · 诊断 ==")
+    print("== 拙诚日课 · 诊断 ==")
     print(f"版本 {VERSION} · Python {sys.version.split()[0]} · 平台 {sys.platform}")
     data_dir = Path(data_dir)
     ok = run_check(data_dir)
@@ -761,7 +761,7 @@ def setup_logging(verbose):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="拙诚日课终端 · 定时中枢 v2")
+    ap = argparse.ArgumentParser(description="拙诚日课 · 定时中枢 v2")
     ap.add_argument("--once", action="store_true", help="推一轮后退出（兼容旧 once 位置参数）")
     ap.add_argument("--dry-run", action="store_true", help="只计算不推送不落盘")
     ap.add_argument("--check", action="store_true", help="快速体检")

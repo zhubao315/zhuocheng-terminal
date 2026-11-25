@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "拙诚日课终端 · 日课提醒库",
+    "name": "拙诚日课 · 日课提醒库",
     "note": "对应日课十二条，每条含 remind（为什么）与 how（2 分钟怎么做）。中枢每 15 分钟轮换一条，推送到定时中枢页 rike-reminder 键。",
     "push_key": "rike-reminder",
     "rotate_every_beats": 90

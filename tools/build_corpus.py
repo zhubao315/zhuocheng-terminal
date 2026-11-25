@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""拙诚日课终端 · 语料构建器
+"""拙诚日课 · 语料构建器
 
 从 corpus_sources/ 的公版摘句与原创内容，构建正好 999 条金句 + 999 条伴读。
 公版经典（金刚经/中论/坛经/道德经/论语/庄子/菜根谭/曾国藩/飞鸟集 等）保留原文；
@@ -405,7 +405,7 @@ def build():
 
     quote_doc = {
         "meta": {
-            "name": "拙诚日课终端 · 金句库",
+            "name": "拙诚日课 · 金句库",
             "note": f"{len(quotes)} 条随机刷新：公版经典原文（金刚经/中论/坛经/道德经/论语/庄子/菜根谭/曾国藩/飞鸟集 等 30+ 来源）"
                     " + 拙诚日课原创与主题转写（现代著作仅作精神转写并标注）。中枢每 10 秒随机换一条（不与上一条重复）。",
             "push_key": "daily-quote",
@@ -415,7 +415,7 @@ def build():
     }
     companion_doc = {
         "meta": {
-            "name": "拙诚日课终端 · AI 伴读内容库",
+            "name": "拙诚日课 · AI 伴读内容库",
             "note": f"{len(companions)} 条自包含条目（passage+source+insight 内嵌），独立于金句库随机轮播，中枢每 30 秒换一条。"
                     "解读由构建器按主题族语池预生成（种子固定、可复现），不依赖 API key 或网络。",
             "push_keys": {"passage": "ai-passage", "insight": "ai-insight"},

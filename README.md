@@ -1,4 +1,4 @@
-# 拙诚日课终端 · ZhuoCheng Terminal
+# 拙诚日课 · ZhuoCheng Daily
 
 > **A Personal System for Daily Cultivation** — 以拙诚立身，以日课修心。
 > 把一部旧手机，变成一张常亮的修身桌面。
@@ -11,16 +11,16 @@
 
 **在线落地页（GitHub Pages）**：<https://zhubao315.github.io/zhuocheng-terminal/> · **全离线版演示**：<https://zhubao315.github.io/zhuocheng-terminal/offline.html> · **桥接版演示**：<https://zhubao315.github.io/zhuocheng-terminal/preview.html>
 
-**全离线 APK 下载**：<https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offline-2.0.apk>（v1+v2 双签，2,454,841 字节，SHA-256 `29f539b64821477f7d93031a770c8183fc8d5a797bcc96639996857dac07c8ec`）
+**全离线 APK 下载**：<https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offline-2.0.apk>（v1+v2 双签，2,454,818 字节，SHA-256 `e85280748905387c768dee75a9e8f8df83e139afd0215aa2f8032568777706bf`）
 
 ## 命名与发布规范（三者统一）
 
 | 项目 | 内容 |
 |---|---|
-| 产品品牌名 | 拙诚日课终端 · ZhuoCheng Terminal |
+| 产品品牌名 | 拙诚日课 · ZhuoCheng Daily |
 | GitHub 仓库 | `zhuocheng-terminal` |
 | GitHub Pages | `https://zhubao315.github.io/zhuocheng-terminal/`（部署自 `docs/` 目录） |
-| Website Title | 拙诚日课终端 · ZhuoCheng Terminal |
+| Website Title | 拙诚日课 · ZhuoCheng Daily |
 | Description | 把旧手机变成一张常亮的修身桌面。离线金句、AI伴读、曾国藩日课与微习惯终端。 |
 | Topics | `zhuocheng` `daily-cultivation` `offline-first` `phonebox` `digital-wellbeing` `python` |
 | License | MIT（代码）；数据许可另行明确（见下方版权声明） |
@@ -32,7 +32,7 @@
 
 ## 它是什么
 
-拙诚日课终端把一部退役手机变成一张「常亮的修行桌面」：
+拙诚日课把一部退役手机变成一张「常亮的修行桌面」：
 
 | 模块 | 节奏 | 内容 |
 |---|---|---|

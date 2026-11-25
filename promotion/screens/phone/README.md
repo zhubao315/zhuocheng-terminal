@@ -6,7 +6,7 @@
 
 - 设备：Redmi Note 2（LineageOS 16 / Android 9，`hermes`）
 - 连接：无线 adb `192.168.1.66:5555`
-- 应用：拙诚日课终端 **v2.1.0 手动信息屏版**（`releases/zhuocheng-offline-2.0.apk`）
+- 应用：拙诚日课 **v2.1.0 手动信息屏版**（`releases/zhuocheng-offline-2.0.apk`）
 - 分辨率：1920 × 1080（横屏），原样保存
 - 状态：断开电脑、断开网络；不加载 PhoneBox 外壳，无离线浮层、无顶部标题栏、无底部导航、无进度条
 

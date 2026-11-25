@@ -6,8 +6,8 @@
 |---|---|
 | 版本 | v2.1.2 · 全离线版 2.1 信息屏（PhoneBox 基座 0.9.29，仅承载 WebView） |
 | 文件 | `releases/zhuocheng-offline-2.0.apk`（Pages 镜像：`docs/releases/`） |
-| 大小 | **2,454,841 字节** |
-| SHA-256 | `29f539b64821477f7d93031a770c8183fc8d5a797bcc96639996857dac07c8ec` |
+| 大小 | **2,454,818 字节** |
+| SHA-256 | `e85280748905387c768dee75a9e8f8df83e139afd0215aa2f8032568777706bf` |
 | 签名 | v1（JAR）+ v2（APK Signature Scheme v2），同一密钥 |
 | 证书 SHA-256 指纹 | `fe7a86a5e0a3b7776fbcbedd6595d879f33a999a4fcf10154639eadc5f90e5be` |
 | 包名 | `net.oxog.phonebox.deskpanel` |
@@ -33,7 +33,7 @@ curl -O https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offlin
 curl -O https://raw.githubusercontent.com/zhubao315/zhuocheng-terminal/main/releases/zhuocheng-offline-2.0.apk
 
 sha256sum zhuocheng-offline-2.0.apk
-# 应输出 29f539b64821477f7d93031a770c8183fc8d5a797bcc96639996857dac07c8ec
+# 应输出 e85280748905387c768dee75a9e8f8df83e139afd0215aa2f8032568777706bf
 
 # 签名指纹（需本机已有 .keys/；签名器 --fingerprint 会拒绝身份不完整）
 python scripts/sign_apk_v2.py --fingerprint

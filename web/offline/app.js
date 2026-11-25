@@ -1,4 +1,4 @@
-/* 拙诚日课终端 · 全离线版 2.0
+/* 拙诚日课 · 全离线版 2.0
    所有内容来自内嵌 DATA，所有状态存于 localStorage。
    不访问网络、不调用 API、不依赖电脑端。兼容 Chromium 80 级 WebView。 */
 (function () {
@@ -323,7 +323,7 @@
         '<div class="sc-stat"><small>静坐次 / 分</small><b>' + sits + ' / ' + minutes + '</b></div></div>' +
         '<div class="sc-week">' + week + '</div></div>';
     }
-    return '<div class="sc-quote"><blockquote>拙诚日课终端</blockquote></div>';
+    return '<div class="sc-quote"><blockquote>拙诚日课</blockquote></div>';
   }
 
   function renderScreen() {
@@ -602,7 +602,7 @@
   }
 
   function buildMarkdown() {
-    var lines = ['# 拙诚日课终端 · 成长档案', '', '导出时间：' + new Date().toLocaleString(), '',
+    var lines = ['# 拙诚日课 · 成长档案', '', '导出时间：' + new Date().toLocaleString(), '',
       '> 所有数据来自本机记录；无记录的日期不生成结论。', '', '## 总览', '',
       '- 有记录天数：' + activeDays().length, '- 连续天数：' + streak(), '- 金句收藏：' + S.favs.quote.length,
       '- 伴读收藏：' + S.favs.companion.length, '', '## 每日记录', ''];

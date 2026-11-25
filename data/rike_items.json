@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "拙诚日课终端 · 日课打卡清单",
+    "name": "拙诚日课 · 日课打卡清单",
     "note": "曾国藩日课十二条的触屏精简版。PhoneBox 原生 checklist 组件按行读取 items，勾选状态存在手机本地（cl:<page>/<widget>），每日自动重置。修改此文件后运行 python setup_checklist.py 重新推送即可。",
     "widget_type": "checklist",
     "target_page": "checkin",

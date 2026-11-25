@@ -47,7 +47,7 @@ def shell(title, body):
     return f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><style>{CSS}</style></head>
 <body><div class="screen">
-<div class="top"><span>拙诚日课终端 · <b>{title}</b></span><span class="st"><span><i></i>离线可用</span><span>14:20</span></span></div>
+<div class="top"><span>拙诚日课 · <b>{title}</b></span><span class="st"><span><i></i>离线可用</span><span>14:20</span></span></div>
 {body}
 <div class="foot">OFFLINE FIRST · ZERO API KEY · 日日不断</div>
 </div></body></html>'''
