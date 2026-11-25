@@ -1,5 +1,14 @@
 # 更新日志
 
+## v2.0.0 (2026-11-25) · 全离线版 2.0（内容引擎搬进手机）
+
+- **修正回退**：v1.4.4 只隐藏了 PhoneBox 的离线浮层，金句/伴读仍靠电脑端 `daily_hub.py` 推送，拔掉电脑后停在空状态。v2.0.0 把内容引擎、定时器和个人档案全部放进手机 WebView，**零电脑 / 零网络 / 零 API Key**。
+- **单文件离线应用**：新增 `web/offline/{app.html,app.css,app.js}` 与 `tools/build_offline_bundle.py`，产出 `docs/offline.html`（约 573 KB），内联 999 金句 + 999 伴读 + 30 微习惯 + 12 日课；浏览器与 APK 共用同一份代码。
+- **七页交互**：总览 / 金句（180s 轮换、暂停、翻阅、收藏、字号）/ 伴读（600s 轮换、原文+品读+今日一问）/ 日课（按日勾选、历史回看）/ 微习惯（三态记录）/ 静坐三省（计时+呼吸+省身）/ 成长档案（真实统计、Markdown 与 JSON 导出）；日间夜间主题。
+- **本地存储**：`localStorage['zhuocheng.offline.v2']` 按日期保存日课、微习惯、静坐与笔记，收藏与设置一并持久化；历史只增不覆盖。
+- **APK**：新增 `tools/build_offline_apk.py`，只替换 PhoneBox 基座 `assets/www/index.html`，彻底不再加载离线浮层；沿用原签名身份（指纹 `fe7a86a5…`），可覆盖安装。产物 `releases/zhuocheng-offline-2.0.apk`，2,456,494 字节，SHA-256 `dc56e5a59a6263df5965a2a11e0f38e51c8c66c59b9b75102c08947986b7c128`。
+- **验证与资产**：`promotion/offline_qa.mjs` 无头浏览器逐页冒烟测试零异常；红米 Note 2 真机 adb 安装 + WebView CDP 七页截图替换 `docs/screens/`，落地页文案、下载入口、README、`docs/07-releases.md` 同步；新增 `docs/08-offline-2.0.md`。
+
 ## v1.4.4 (2026-11-25) · 离线纯净模式与真机实拍展示
 
 - **离线纯净**：APK 内 `assets/www/style.css` 注入规则强制隐藏 PhoneBox 外壳的全部离线提示——`#offline`「电脑未连接」pill、`#wake`「唤醒电脑」按钮、`.offline-msg` / `.deck-offline::after` 内嵌占位提示，以及总览时钟卡状态行（改为「离线就绪」）。真机验证：离线状态下界面干净，无连电脑引导；保留全部 widget 与推送功能。签名身份不变（指纹 `fe7a86a5…`），可覆盖安装。
