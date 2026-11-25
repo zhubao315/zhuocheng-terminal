@@ -2,14 +2,16 @@
 
 > **A Personal System for Daily Cultivation** — 以拙诚立身，以日课修心。
 > 把一部旧手机，变成一张常亮的修身桌面。
-> 日常模式：金句 3 分钟一组（组内可翻阅）· AI 伴读 10 分钟一组 · 曾国藩日课十二条触屏打卡 · 微习惯每小时轮换 · 硬件感知中枢；演示模式保留 10/30 秒快速轮播。
+> **全离线版 2.0（默认）**：金句 180 秒 · 伴读 600 秒 · 微习惯每小时 · 曾国藩日课十二条触屏打卡 · 静坐三省 · 成长档案，全部在手机内运行，**不需要电脑、不需要网络、不需要 API Key**。
 >
-> 硬件原型：红米 Note 2（hermes / MT6795，刷入 LineageOS 16）+ [PhoneBox](https://ersinkoc.github.io/phonebox/) 面板。
-> 无需任何 API key、无需联网抓取——全部 999 条伴读解读在构建期预生成。
+> 硬件原型：红米 Note 2（hermes / MT6795，刷入 LineageOS 16）。APK 基座来自 [PhoneBox](https://ersinkoc.github.io/phonebox/)，离线版只借它承载 WebView。
+> 桥接版 v1.4.4 仍保留电脑端中枢与硬件采集，供需要集中管理的用户选用。
 
 ![status](https://img.shields.io/badge/quotes-999-blue) ![status](https://img.shields.io/badge/companions-999-purple) ![status](https://img.shields.io/badge/microhabits-30-teal) ![license](https://img.shields.io/badge/code%20license-MIT-green)
 
-**在线落地页（GitHub Pages）**：<https://zhubao315.github.io/zhuocheng-terminal/> · **浏览器演示**：<https://zhubao315.github.io/zhuocheng-terminal/preview.html>
+**在线落地页（GitHub Pages）**：<https://zhubao315.github.io/zhuocheng-terminal/> · **全离线版演示**：<https://zhubao315.github.io/zhuocheng-terminal/offline.html> · **桥接版演示**：<https://zhubao315.github.io/zhuocheng-terminal/preview.html>
+
+**全离线 APK 下载**：<https://zhubao315.github.io/zhuocheng-terminal/releases/zhuocheng-offline-2.0.apk>（v1+v2 双签，2,456,494 字节，SHA-256 `dc56e5a59a6263df5965a2a11e0f38e51c8c66c59b9b75102c08947986b7c128`）
 
 ## 命名与发布规范（三者统一）
 
@@ -66,7 +68,18 @@
 
 浏览器打开 [`web/preview.html`](web/preview.html) 可以直接体验金句/伴读轮换效果（无需手机）。
 
-## 快速开始
+## 全离线版 2.0（推荐）
+
+1. 下载 `releases/zhuocheng-offline-2.0.apk` 安装到手机；同一签名，可直接覆盖 v1.4.4。
+2. 打开应用即可：999 金句、999 伴读、12 日课、30 微习惯、静坐三省与成长档案都已内置。
+3. 拔掉数据线、关掉电脑、断开网络——照常轮换与打卡；记录只存本机。
+4. 不想装 APK：浏览器打开 <https://zhubao315.github.io/zhuocheng-terminal/offline.html>，功能相同。
+
+实现细节、数据格式、构建复现与真机验证见 [`docs/08-offline-2.0.md`](docs/08-offline-2.0.md)。
+
+## 快速开始（桥接版 v1.4.4，可选）
+
+需要一台常驻电脑运行 PhoneBoxAgent + Python 中枢，适合集中管理或采集硬件数据。
 
 ### 0. 准备
 
