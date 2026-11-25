@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拙诚日课终端 · 产品宣传片场景</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #0e1116; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: #eef2f6; }
+  #stage {
+    position: relative; width: 1280px; height: 720px; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 38%, #17212d 0%, #0e1116 62%);
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(94,200,180,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(94,200,180,.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  .vign { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,.62) 100%); }
+  .halo {
+    position: absolute; left: 50%; top: 46%; width: 620px; height: 620px;
+    transform: translate(-50%,-50%); border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,180,94,.10) 0%, transparent 68%);
+  }
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+
+  /* corner brand + progress */
+  .corner { position: absolute; top: 30px; left: 40px; font-size: 13px; letter-spacing: .28em; color: #8a94a3; z-index: 20; }
+  .corner b { color: #f5b45e; }
+  .timecode { position: absolute; top: 30px; right: 40px; font-size: 12px; letter-spacing: .16em; color: #5b6676; z-index: 20; font-variant-numeric: tabular-nums; }
+  .bar { position: absolute; left: 0; bottom: 0; height: 3px; background: linear-gradient(90deg,#5ec8b4,#f5b45e); width: 0; z-index: 20; }
+
+  /* phone */
+  .phone {
+    position: relative; width: 190px; height: 380px; border-radius: 30px;
+    border: 2px solid #2a3342; background: #0a0d12;
+    box-shadow: 0 30px 70px rgba(0,0,0,.7), inset 0 0 0 6px #12171f;
+  }
+  .phone .notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 54px; height: 5px; border-radius: 3px; background: #2a3342; }
+  .phone .screen {
+    position: absolute; left: 12px; right: 12px; top: 26px; bottom: 26px; border-radius: 16px;
+    background: #0e1116; overflow: hidden; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 14px;
+  }
+  .phone .screen .q { font-size: 17px; line-height: 1.65; color: #e8d9b8; letter-spacing: .04em; }
+  .phone .screen .lbl { font-size: 10px; letter-spacing: .18em; color: #5b6676; margin-bottom: 16px; }
+  .phone .screen .mini { font-size: 9px; color: #5b6676; letter-spacing: .12em; margin-top: 18px; }
+  .dust { position: absolute; border-radius: 50%; background: #8a94a3; opacity: .18; }
+
+  /* scene 1 text */
+  .s1-title { position: absolute; top: 118px; font-size: 40px; letter-spacing: .16em; font-weight: 700; color: #c3cbd6; }
+  .s1-sub { position: absolute; bottom: 96px; font-size: 22px; letter-spacing: .22em; color: #8a94a3; }
+
+  /* scene 2 */
+  .brand-zh { font-size: 68px; font-weight: 800; letter-spacing: .16em; color: #f5b45e; text-shadow: 0 0 40px rgba(245,180,94,.28); }
+  .brand-en { font-size: 16px; letter-spacing: .52em; color: #8a94a3; margin-top: 14px; text-transform: uppercase; }
+  .slogan { font-size: 27px; color: #e8d9b8; letter-spacing: .12em; margin-top: 42px; font-weight: 600; }
+  .rule { width: 120px; height: 1px; background: linear-gradient(90deg,transparent,#f5b45e,transparent); margin: 26px 0 0; }
+
+  /* scene 3 */
+  .s3-head { font-size: 30px; letter-spacing: .1em; color: #eef2f6; margin-bottom: 34px; font-weight: 700; }
+  .cards { display: grid; grid-template-columns: repeat(2, 400px); gap: 18px; }
+  .fcard {
+    height: 128px; border: 1px solid #2a3342; border-radius: 16px; background: #171c24;
+    padding: 22px 26px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .fcard .n { font-size: 13px; letter-spacing: .2em; color: #f5b45e; font-weight: 700; }
+  .fcard .t { font-size: 22px; color: #eef2f6; margin-top: 8px; font-weight: 700; letter-spacing: .06em; }
+  .fcard .d { font-size: 13px; color: #8a94a3; margin-top: 6px; letter-spacing: .04em; }
+  .fcard.teal .n { color: #5ec8b4; }
+  .fcard.teal { border-color: rgba(94,200,180,.28); }
+
+  /* scene 4 */
+  .s4-head { font-size: 15px; letter-spacing: .44em; color: #8a94a3; margin-bottom: 44px; }
+  .nums { display: flex; gap: 78px; align-items: flex-end; }
+  .numwrap { text-align: center; }
+  .num { font-size: 92px; font-weight: 800; color: #f5b45e; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
+  .num.teal { color: #5ec8b4; }
+  .numlbl { font-size: 14px; color: #8a94a3; letter-spacing: .18em; margin-top: 16px; }
+  .s4-foot { margin-top: 52px; font-size: 18px; letter-spacing: .3em; color: #e8d9b8; }
+
+  /* scene 5 */
+  .end-mark { font-size: 54px; font-weight: 800; letter-spacing: .18em; color: #f5b45e; }
+  .end-sub { font-size: 15px; letter-spacing: .38em; color: #8a94a3; margin-top: 12px; }
+  .end-btns { display: flex; gap: 14px; margin-top: 52px; }
+  .end-btns .b {
+    padding: 14px 28px; border: 1px solid #2a3342; border-radius: 10px;
+    font-size: 15px; color: #c3cbd6; background: #171c24; letter-spacing: .08em;
+  }
+  .end-btns .b.pri { background: #f5b45e; color: #1b1711; border-color: #f5b45e; font-weight: 700; }
+  .end-foot { margin-top: 44px; font-size: 16px; letter-spacing: .3em; color: #5ec8b4; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grid"></div>
+  <div class="halo"></div>
+  <div class="vign"></div>
+  <div class="corner">拙诚日课终端 <b>·</b> ZHUOCHENG TERMINAL</div>
+  <div class="timecode" id="tc">00:00 / 00:20</div>
+  <div class="bar" id="bar"></div>
+
+  <!-- scene 1 -->
+  <div class="scene" id="s1">
+    <div class="s1-title">抽屉里的旧手机</div>
+    <div class="phone" id="p1"><div class="notch"></div><div class="screen"><div class="lbl">IDLE DEVICE</div><div class="q" style="color:#5b6676">…</div><div class="mini">DUST · 000 DAYS</div></div></div>
+    <div class="s1-sub">还能做什么？</div>
+  </div>
+
+  <!-- scene 2 -->
+  <div class="scene" id="s2">
+    <div class="brand-zh">拙诚日课终端</div>
+    <div class="brand-en">ZhuoCheng Terminal</div>
+    <div class="rule"></div>
+    <div class="slogan">把旧手机变成常亮的修身桌面</div>
+  </div>
+
+  <!-- scene 3 -->
+  <div class="scene" id="s3">
+    <div class="s3-head">一座随身的数字修身小院</div>
+    <div class="cards">
+      <div class="fcard" data-i="0"><div class="n">01 · OFFLINE</div><div class="t">离线金句 999 条</div><div class="d">每 3 分钟一句 · 10 条一组</div></div>
+      <div class="fcard teal" data-i="1"><div class="n">02 · COMPANION</div><div class="t">AI 伴读 999 段</div><div class="d">每 10 分钟一段 · 5 段一组</div></div>
+      <div class="fcard" data-i="2"><div class="n">03 · RITUAL</div><div class="t">日课 · 静坐三省</div><div class="d">曾国藩日课 · 定时静默提醒</div></div>
+      <div class="fcard teal" data-i="3"><div class="n">04 · HABIT</div><div class="t">微习惯 · 定时中枢</div><div class="d">30 条微习惯 · 完成才打卡</div></div>
+    </div>
+  </div>
+
+  <!-- scene 4 -->
+  <div class="scene" id="s4">
+    <div class="s4-head">OFFLINE FIRST · ZERO API KEY</div>
+    <div class="nums">
+      <div class="numwrap"><div class="num" id="n1">0</div><div class="numlbl">金句 / 伴读</div></div>
+      <div class="numwrap"><div class="num teal" id="n2">0</div><div class="numlbl">离线可用</div></div>
+      <div class="numwrap"><div class="num" id="n3">0</div><div class="numlbl">数据上传</div></div>
+    </div>
+    <div class="s4-foot">不联网 · 不注册 · 不收集</div>
+  </div>
+
+  <!-- scene 5 -->
+  <div class="scene" id="s5">
+    <div class="end-mark">日日不断</div>
+    <div class="end-sub">拙 诚 拱 卒 · 长 期 主 义</div>
+    <div class="end-btns">
+      <div class="b pri">在线体验</div>
+      <div class="b">下载 APK</div>
+      <div class="b">开源仓库</div>
+    </div>
+    <div class="end-foot">zhuocheng-terminal</div>
+  </div>
+</div>
+
+<script>
+  var TOTAL = 20;
+  function clamp(x){ return x < 0 ? 0 : (x > 1 ? 1 : x); }
+  function seg(t,a,b){ return clamp((t-a)/(b-a)); }
+  function ease(p){ return 1 - Math.pow(1-p, 3); }
+  function fade(t,a,b,f) {
+    var p = seg(t,a,b);
+    if (p <= 0) return 0;
+    return Math.min(ease(seg(t,a,a+f)), 1-ease(seg(t,b-f,b)));
+  }
+  function setOpacity(el,v){ el.style.opacity = Number(v).toFixed(3); }
+  function move(el,x,y){ el.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)'; }
+
+  function render(t) {
+    t = Math.max(0, Math.min(TOTAL, t));
+    document.getElementById('tc').textContent =
+      '00:' + String(Math.floor(t)).padStart(2,'0') + ' / 00:20';
+    document.getElementById('bar').style.width = (t/TOTAL*1280).toFixed(1) + 'px';
+
+    var s1 = document.getElementById('s1');
+    var s2 = document.getElementById('s2');
+    var s3 = document.getElementById('s3');
+    var s4 = document.getElementById('s4');
+    var s5 = document.getElementById('s5');
+
+    // scene opacities
+    setOpacity(s1, fade(t, 0.0, 4.0, 0.6));
+    setOpacity(s2, fade(t, 4.0, 8.5, 0.6));
+    setOpacity(s3, fade(t, 8.5, 13.5, 0.55));
+    setOpacity(s4, fade(t, 13.5, 17.2, 0.5));
+    setOpacity(s5, fade(t, 17.2, 20.0, 0.6));
+
+    // s1: phone floats up, text shifts
+    var p1 = ease(seg(t,0.2,1.4));
+    move(s1.querySelector('.phone'), 0, (1-p1)*26);
+    var q = ease(seg(t,0.5,1.6));
+    move(s1.querySelector('.s1-title'), 0, (1-q)*-16);
+    var r = ease(seg(t,1.8,3.0));
+    move(s1.querySelector('.s1-sub'), 0, (1-r)*18);
+
+    // s2: title rises
+    var a2 = ease(seg(t,4.3,5.5));
+    s2.querySelectorAll('.brand-zh,.brand-en,.rule,.slogan').forEach(function(el,i){
+      move(el, 0, (1-ease(seg(t,4.2+i*0.16,5.4+i*0.16)))*26);
+    });
+
+    // s3: cards stagger in
+    s3.querySelectorAll('.fcard').forEach(function(el,i){
+      var e = ease(seg(t, 8.9+i*0.28, 9.9+i*0.28));
+      move(el, (1-e)*36, 0);
+      setOpacity(el, e.toFixed(3));
+    });
+    var h3 = ease(seg(t,8.7,9.7));
+    move(s3.querySelector('.s3-head'), 0, (1-h3)*-18);
+
+    // s4: counters
+    document.getElementById('n1').textContent = String(Math.round(999*ease(seg(t,14.0,15.2))));
+    document.getElementById('n2').textContent = String(Math.round(100*ease(seg(t,14.2,15.4)))) + '%';
+    document.getElementById('n3').textContent = String(Math.round(0*ease(seg(t,14.4,15.6))));
+    document.getElementById('n3').textContent = '0';
+    var f4 = ease(seg(t,15.4,16.4));
+    move(s4.querySelector('.s4-foot'), 0, (1-f4)*16);
+
+    // s5: buttons stagger
+    s5.querySelectorAll('.end-btns .b').forEach(function(el,i){
+      var e = ease(seg(t, 18.0+i*0.2, 19.0+i*0.2));
+      move(el, 0, (1-e)*20);
+      setOpacity(el, e.toFixed(3));
+    });
+    var m5 = ease(seg(t,17.5,18.6));
+    move(s5.querySelector('.end-mark'), 0, (1-m5)*-20);
+  }
+  window.renderFrame = render;
+  render(0);
+</script>
+</body>
+</html>
