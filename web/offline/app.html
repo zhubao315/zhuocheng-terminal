@@ -13,12 +13,12 @@
   <section id="screen" class="screen">
     <div class="screen-top">
       <span id="scDate">—</span>
-      <span class="screen-tag"><i></i>纯离线 · 信息屏</span>
+      <span class="screen-tag"><i></i>拙诚日课</span>
       <span id="scClock">—</span>
     </div>
-    <div class="screen-progress"><i id="scProgress"></i></div>
     <div id="scBody" class="screen-body"></div>
-    <div id="scHint" class="screen-hint">轻触换屏 · 双击暂停 · 长按配置</div>
+    <div id="scNav" class="screen-nav"></div>
+    <div id="scHint" class="screen-hint">左右滑动 / 点击栏目切换 · 长按配置</div>
   </section>
 
   <header id="topbar">
@@ -190,6 +190,7 @@
   <div id="cfgMask" class="cfg-mask" hidden></div>
   <aside id="cfgPanel" class="cfg-panel" hidden>
     <div class="cfg-head"><b>多端配置</b><button id="cfgClose" type="button" class="ghost">关闭</button></div>
+    <div class="cfg-scroll">
 
     <small class="label">设备预设</small>
     <div id="cfgProfiles" class="cfg-profiles">
@@ -205,20 +206,22 @@
 
     <small class="label">显示</small>
     <div class="cfg-row"><label>字号 <input id="cfgScale" type="range" min="0.8" max="1.8" step="0.05"></label>
-      <label>每屏秒数 <input id="cfgSec" type="number" min="5" max="300" step="5"></label></div>
+      <label>默认栏目
+      <select id="cfgStart"><option value="quote">每日金句</option><option value="companion">AI 伴读</option><option value="rike">日课十二条</option><option value="habit">微习惯</option><option value="sit">静坐三省</option><option value="archive">成长档案</option></select></label></div>
     <div class="cfg-row"><label>主题
       <select id="cfgTheme"><option value="dark">夜间</option><option value="light">日间</option></select></label>
       <label>模式
       <select id="cfgMode"><option value="screen">信息屏（推荐）</option><option value="full">完整交互</option></select></label></div>
 
-    <small class="label">轮播模块</small>
+    <small class="label">显示栏目（左右切换按此顺序）</small>
     <div id="cfgModules" class="cfg-modules"></div>
+    <p class="footnote">配置只存本机。信息屏默认停在「默认栏目」，不再自动轮播；左右滑动、点屏幕左右半区或点栏目名即可手动切换。顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
+    </div>
 
     <div class="cfg-actions">
       <button id="cfgSave" class="primary" type="button">保存并应用</button>
       <button id="cfgReset" type="button">恢复默认</button>
     </div>
-    <p class="footnote">配置只存本机。换成其他设备时，选对应预设即可；顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
   </aside>
 </div>
 <div id="toast"></div>
