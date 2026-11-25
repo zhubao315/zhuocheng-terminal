@@ -18,10 +18,10 @@
   var ALL_MODULES = ['quote', 'companion', 'rike', 'habit', 'sit', 'archive'];
   // 多端预设：留白用于避开固定系统栏/外壳区域；scale 控制信息屏字号
   var PROFILES = {
-    'note2-landscape': { safeTop: 0, safeBottom: 0, scale: 1.45, sec: 20 },
-    'note2-portrait': { safeTop: 0, safeBottom: 0, scale: 1.15, sec: 18 },
-    'tablet': { safeTop: 12, safeBottom: 12, scale: 1.25, sec: 20 },
-    'desktop': { safeTop: 0, safeBottom: 0, scale: 1.1, sec: 25 }
+    'note2-landscape': { safeTop: 0, safeBottom: 0, scale: 1.45 },
+    'note2-portrait': { safeTop: 0, safeBottom: 0, scale: 1.15 },
+    'tablet': { safeTop: 12, safeBottom: 12, scale: 1.25 },
+    'desktop': { safeTop: 0, safeBottom: 0, scale: 1.1 }
   };
   var $ = function (id) { return document.getElementById(id); };
   var currentPage = 'overview';
@@ -65,7 +65,8 @@
       settings: {
         theme: 'dark', fontScale: 1, quoteSec: 180, companionSec: 600, habitSec: 3600,
         mode: 'screen', profile: 'auto', safeTop: 0, safeBottom: 0,
-        screenScale: 1.45, screenSec: 20, screenModules: ALL_MODULES.slice()
+        screenScale: 1.45, screenModules: ALL_MODULES.slice(),
+        startModule: 'quote'
       },
       idx: { quote: 0, companion: 0, habit: 0 },
       paused: { quote: false, companion: false, habit: false },
@@ -91,6 +92,7 @@
     if (s.settings.mode !== 'full') s.settings.mode = 'screen';
     if (!PROFILES[s.settings.profile] && s.settings.profile !== 'auto') s.settings.profile = 'auto';
     if (!s.settings.screenModules || !s.settings.screenModules.length) s.settings.screenModules = ALL_MODULES.slice();
+    if (ALL_MODULES.indexOf(s.settings.startModule) < 0) s.settings.startModule = 'quote';
     for (var t in d.idx) { if (s.idx[t] == null) s.idx[t] = 0; }
     for (var p in d.paused) { if (s.paused[p] == null) s.paused[p] = false; }
     if (!s.favs.quote) s.favs.quote = [];
@@ -190,10 +192,31 @@
 
   /* ---------------- 信息屏（默认形态，极少互动） ---------------- */
 
+  var MODULE_SHORT = {
+    quote: '金句', companion: '伴读', rike: '日课',
+    habit: '习惯', sit: '静坐', archive: '档案'
+  };
   var screenOrder = ALL_MODULES.slice();
-  var screenAt = 0, screenElapsed = 0, screenPaused = false;
+  var screenAt = 0;
   var hintTimer = null, suppressClick = false, swiped = false, longTimer = null;
-  var touchX = 0, touchY = 0, tapCount = 0, singleTimer = null;
+  var touchX = 0, touchY = 0, swipedAt = 0;
+
+  // 信息屏是静态常亮屏：每次打开都停在「默认栏目」（金句），不记住上次栏目、不自动轮播。
+  function resetToStart() {
+    var i = screenOrder.indexOf(S.settings.startModule);
+    screenAt = i >= 0 ? i : 0;
+  }
+
+  function renderNav() {
+    var nav = $('scNav');
+    if (!nav) return;
+    var html = '';
+    for (var i = 0; i < screenOrder.length; i++) {
+      html += '<button type="button" data-go="' + i + '"' +
+        (i === screenAt ? ' class="active"' : '') + '>' + esc(MODULE_SHORT[screenOrder[i]] || '') + '</button>';
+    }
+    nav.innerHTML = html;
+  }
 
   function currentProfile() {
     var p = S.settings.profile;
@@ -206,7 +229,7 @@
     var p = PROFILES[currentProfile()];
     if (st.profile === 'auto' && !st.autoTuned) {
       st.safeTop = p.safeTop; st.safeBottom = p.safeBottom;
-      st.screenScale = p.scale; st.screenSec = p.sec;
+      st.screenScale = p.scale;
     }
     var root = document.documentElement;
     root.style.setProperty('--safe-top', Math.max(0, st.safeTop) + 'px');
@@ -218,7 +241,8 @@
       if (st.screenModules.indexOf(ALL_MODULES[i]) >= 0) order.push(ALL_MODULES[i]);
     }
     screenOrder = order.length ? order : ALL_MODULES.slice();
-    if (screenAt >= screenOrder.length) screenAt = 0;
+    // 栏目顺序按配置固定，不做自动轮播；默认停在设定的栏目。
+    resetToStart();
     if (st.mode === 'screen') renderScreen();
   }
 
@@ -301,33 +325,35 @@
 
   function renderScreen() {
     if (!screenOrder.length) screenOrder = ALL_MODULES.slice();
-    if (screenAt >= screenOrder.length) screenAt = 0;
+    if (screenAt >= screenOrder.length || screenAt < 0) screenAt = 0;
     var now = new Date();
     $('scDate').textContent = now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() +
       ' 日 · 星期' + weekText(now);
-    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
-      (screenPaused ? ' · 已暂停' : '');
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
     $('scBody').innerHTML = screenHtml(screenOrder[screenAt]);
-    $('scProgress').style.width = Math.round(screenElapsed / Math.max(1, S.settings.screenSec) * 100) + '%';
+    renderNav();
   }
 
+  // 手动切换栏目：左右滑动、点屏幕左右半区、点栏目名、键盘方向键。不自动轮播。
   function screenStep(delta) {
     if (!screenOrder.length) return;
     screenAt = (screenAt + delta + screenOrder.length) % screenOrder.length;
-    screenElapsed = 0;
     renderScreen();
     showHint();
   }
 
+  function screenGo(index) {
+    if (index < 0 || index >= screenOrder.length) return;
+    screenAt = index;
+    renderScreen();
+    showHint();
+  }
+
+  // 只走时钟与本地内容轮换，绝不自动切换栏目。
   function screenTick() {
     if (S.settings.mode !== 'screen') return;
     var now = new Date();
-    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
-      (screenPaused ? ' · 已暂停' : '');
-    if (screenPaused) return;
-    screenElapsed++;
-    if (screenElapsed >= Math.max(5, S.settings.screenSec)) { screenStep(1); }
-    else $('scProgress').style.width = Math.round(screenElapsed / Math.max(5, S.settings.screenSec) * 100) + '%';
+    $('scClock').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
   }
 
   function openConfig() {
@@ -335,7 +361,7 @@
     $('cfgTop').value = st.safeTop;
     $('cfgBottom').value = st.safeBottom;
     $('cfgScale').value = st.screenScale;
-    $('cfgSec').value = st.screenSec;
+    $('cfgStart').value = st.startModule;
     $('cfgTheme').value = st.theme;
     $('cfgMode').value = st.mode;
     var ps = $('cfgProfiles').getElementsByTagName('button');
@@ -345,21 +371,19 @@
     var mh = '';
     for (var m = 0; m < SCREEN_MODULES.length; m++) {
       var sm = SCREEN_MODULES[m];
-      mh += '<label><input type="checkbox" data-key="' + sm.key + '"' +
-        (st.screenModules.indexOf(sm.key) >= 0 ? ' checked' : '') + '>' + sm.label + '</label>';
+      mh += '<label title="' + esc(sm.label) + '"><input type="checkbox" data-key="' + sm.key + '"' +
+        (st.screenModules.indexOf(sm.key) >= 0 ? ' checked' : '') + '>' +
+        esc(MODULE_SHORT[sm.key] || sm.label) + '</label>';
     }
     $('cfgModules').innerHTML = mh;
     $('cfgMask').hidden = false;
     $('cfgPanel').hidden = false;
-    screenPaused = true;
     suppressClick = true;
   }
 
   function closeConfig() {
     $('cfgMask').hidden = true;
     $('cfgPanel').hidden = true;
-    screenPaused = false;
-    screenElapsed = 0;
     suppressClick = true;
     renderScreen();
   }
@@ -374,7 +398,8 @@
     st.safeTop = Math.min(240, Math.max(0, parseInt($('cfgTop').value, 10) || 0));
     st.safeBottom = Math.min(240, Math.max(0, parseInt($('cfgBottom').value, 10) || 0));
     st.screenScale = Math.min(1.8, Math.max(0.8, parseFloat($('cfgScale').value) || 1));
-    st.screenSec = Math.min(300, Math.max(5, parseInt($('cfgSec').value, 10) || 20));
+    st.startModule = $('cfgStart').value;
+    if (ALL_MODULES.indexOf(st.startModule) < 0) st.startModule = 'quote';
     st.theme = $('cfgTheme').value;
     st.mode = $('cfgMode').value;
     st.screenModules = mods.length ? mods : ALL_MODULES.slice();
@@ -605,26 +630,30 @@
 
   function tick() {
     var now = Date.now();
-    var cfg = { quote: S.settings.quoteSec, companion: S.settings.companionSec, habit: S.settings.habitSec };
-    var changed = false;
-    var t;
-    for (t in cfg) {
-      if (!S.paused[t] && now - lastRun[t] >= cfg[t] * 1000) {
-        lastRun[t] = now;
-        var a = list(t), cur = S.idx[t] % (a.length || 1);
-        var n = cur + 1 + Math.floor(Math.random() * Math.max(1, a.length - 1));
-        S.idx[t] = a.length > 1 ? n % a.length : 0;
-        save();
-        changed = true;
+    // 信息屏是静态常亮屏：栏目不自动切换、内容不自动换新，只有时钟在走。
+    // 自动轮换仅在「完整交互」模式保留。
+    if (S.settings.mode !== 'screen') {
+      var cfg = { quote: S.settings.quoteSec, companion: S.settings.companionSec, habit: S.settings.habitSec };
+      var changed = false;
+      var t;
+      for (t in cfg) {
+        if (!S.paused[t] && now - lastRun[t] >= cfg[t] * 1000) {
+          lastRun[t] = now;
+          var a = list(t), cur = S.idx[t] % (a.length || 1);
+          var n = cur + 1 + Math.floor(Math.random() * Math.max(1, a.length - 1));
+          S.idx[t] = a.length > 1 ? n % a.length : 0;
+          save();
+          changed = true;
+        }
       }
-    }
-    if (changed && (currentPage === 'quote' || currentPage === 'companion' || currentPage === 'habit')) {
-      renderPage(currentPage);
-    }
-    if (currentPage === 'overview') {
-      $('ovNext').textContent = '金句 ' + mmss(cfg.quote - (now - lastRun.quote) / 1000) +
-        ' · 伴读 ' + mmss(cfg.companion - (now - lastRun.companion) / 1000);
-      $('ovUptime').textContent = Math.floor((now - bootAt) / 60000) + ' 分 ' + Math.floor((now - bootAt) / 1000 % 60) + ' 秒';
+      if (changed && (currentPage === 'quote' || currentPage === 'companion' || currentPage === 'habit')) {
+        renderPage(currentPage);
+      }
+      if (currentPage === 'overview') {
+        $('ovNext').textContent = '金句 ' + mmss(cfg.quote - (now - lastRun.quote) / 1000) +
+          ' · 伴读 ' + mmss(cfg.companion - (now - lastRun.companion) / 1000);
+        $('ovUptime').textContent = Math.floor((now - bootAt) / 60000) + ' 分 ' + Math.floor((now - bootAt) / 1000 % 60) + ' 秒';
+      }
     }
     if (sitRunning) {
       sitLeft--;
@@ -638,11 +667,11 @@
   }
 
   function bind() {
-    // 信息屏：轻触换屏、双击暂停、长按配置、左右滑动换屏
+    // 信息屏：左右滑动 / 点左右半区 / 点栏目名手动切换；长按配置。不自动轮播。
     var sc = $('screen');
     sc.addEventListener('touchstart', function (e) {
       var t = e.touches[0];
-      touchX = t.clientX; touchY = t.clientY; swiped = false;
+      touchX = t.clientX; touchY = t.clientY; swiped = false; suppressClick = false;
       if (longTimer) clearTimeout(longTimer);
       longTimer = setTimeout(function () { longTimer = null; openConfig(); }, 650);
     }, { passive: true });
@@ -658,21 +687,26 @@
       if (swiped) {
         var t = e.changedTouches[0];
         if (Math.abs(t.clientX - touchX) > Math.abs(t.clientY - touchY)) screenStep(t.clientX < touchX ? 1 : -1);
+        swipedAt = Date.now();
         suppressClick = true;
       }
     }, { passive: true });
-    sc.addEventListener('click', function () {
-      if (suppressClick) { suppressClick = false; return; }
-      tapCount++;
-      if (tapCount === 1) {
-        singleTimer = setTimeout(function () { screenStep(1); tapCount = 0; singleTimer = null; }, 320);
-      } else if (tapCount === 2) {
-        if (singleTimer) { clearTimeout(singleTimer); singleTimer = null; }
-        screenPaused = !screenPaused;
-        renderScreen();
-        toast(screenPaused ? '轮播已暂停' : '轮播已继续');
-        tapCount = 0;
-      }
+    // 点击屏幕左半区 = 上一栏，右半区 = 下一栏（栏目条与配置按钮各自拦截）
+    sc.addEventListener('click', function (e) {
+      if (suppressClick || Date.now() - swipedAt < 400) { suppressClick = false; return; }
+      if (!$('cfgPanel').hidden) return;
+      var x = e.clientX;
+      if (x == null) x = window.innerWidth / 2;
+      screenStep(x < window.innerWidth / 2 ? -1 : 1);
+    });
+    // 栏目条：点栏目名直达，不触发左右半区逻辑
+    $('scNav').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (suppressClick || Date.now() - swipedAt < 400) { suppressClick = false; return; }
+      var btn = e.target;
+      while (btn && btn !== this && !btn.getAttribute('data-go')) btn = btn.parentNode;
+      if (!btn || btn === this) return;
+      screenGo(parseInt(btn.getAttribute('data-go'), 10));
     });
 
     $('cfgBtn').onclick = openConfig;
@@ -691,7 +725,6 @@
           $('cfgTop').value = p.safeTop;
           $('cfgBottom').value = p.safeBottom;
           $('cfgScale').value = p.scale;
-          $('cfgSec').value = p.sec;
         };
       })(pbs[pi]);
     }
@@ -700,9 +733,8 @@
       if (S.settings.mode !== 'screen' || !$('cfgPanel').hidden) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { screenStep(1); e.preventDefault(); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { screenStep(-1); e.preventDefault(); }
-      else if (e.key === ' ' || e.key === 'Enter') {
-        screenPaused = !screenPaused; renderScreen(); e.preventDefault();
-      } else if (e.key === 'c' || e.key === 'C') { openConfig(); }
+      else if (e.key === ' ' || e.key === 'Enter') { screenStep(1); e.preventDefault(); }
+      else if (e.key === 'c' || e.key === 'C') { openConfig(); }
     });
 
     $('themeBtn').onclick = function () {
@@ -816,6 +848,7 @@
     show: show, advance: advance, state: function () { return S; },
     screenNext: function () { screenStep(1); },
     screenPrev: function () { screenStep(-1); },
+    screenGo: screenGo,
     screenMode: function (on) {
       S.settings.mode = on ? 'screen' : 'full'; save(); applyScreenConfig(); renderScreen();
     },
@@ -826,8 +859,9 @@
     config: function () {
       return {
         profile: currentProfile(), mode: S.settings.mode, safeTop: S.settings.safeTop,
-        safeBottom: S.settings.safeBottom, scale: S.settings.screenScale, sec: S.settings.screenSec,
-        order: screenOrder.slice(), at: screenAt, paused: screenPaused
+        safeBottom: S.settings.safeBottom, scale: S.settings.screenScale,
+        order: screenOrder.slice(), at: screenAt, module: screenOrder[screenAt],
+        start: S.settings.startModule, autoRotate: false
       };
     },
     openConfig: openConfig, closeConfig: closeConfig
