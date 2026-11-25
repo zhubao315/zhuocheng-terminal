@@ -118,6 +118,145 @@ textarea{width:100%;margin-top:10px;background:var(--panel2);border:1px solid va
 #tabs button span{font-size:17px;line-height:1.2;margin-bottom:2px;color:var(--muted)}
 #tabs button.active{color:var(--gold)}
 #tabs button.active span{color:var(--gold)}
+/* ===== 信息屏模式（默认）：全屏、自动轮播、无顶底导航 ===== */
+:root{--safe-top:0px;--safe-bottom:0px;--screen-scale:1}
+body.screen-mode #topbar,body.screen-mode #tabs,body.screen-mode #main{display:none!important}
+body.screen-mode #app{height:100%;position:relative}
+body.screen-mode #cfgBtn{opacity:.18}
+#screen{display:none;position:absolute;left:0;right:0;top:0;bottom:0;flex-direction:column;overflow:hidden;
+  padding:calc(var(--safe-top) + 14px) 24px calc(var(--safe-bottom) + 12px)}
+body.screen-mode #screen{display:flex}
+.screen-top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;
+  color:var(--muted);font-size:13px;letter-spacing:.05em}
+.screen-tag{color:var(--teal);font-size:12px}
+.screen-tag i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:6px}
+.screen-progress{height:3px;background:var(--panel2);border-radius:3px;margin:10px 0 0;overflow:hidden;flex:0 0 auto}
+.screen-progress i{display:block;height:100%;width:0;background:var(--gold);transition:width .9s linear}
+.screen-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;
+  overflow:hidden;padding:1.5vh 0}
+.screen-hint{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.08em;opacity:.55;
+  flex:0 0 auto;transition:opacity .8s}
+.screen-hint.dim{opacity:.07}
+.sc-kicker{display:block;color:var(--gold);font-size:calc(14px * var(--screen-scale));letter-spacing:.18em;margin-bottom:2vh}
+.sc-quote{text-align:center}
+.sc-quote blockquote{margin:0;font-size:calc(46px * var(--screen-scale));line-height:1.5;font-weight:600;
+  word-break:break-word;letter-spacing:.02em}
+.sc-quote .sc-source{margin-top:3vh;color:var(--muted);font-size:calc(16px * var(--screen-scale))}
+.sc-companion .sc-passage{font-size:calc(32px * var(--screen-scale));line-height:1.55;font-weight:600;margin:0 0 2vh}
+.sc-companion .sc-insight{font-size:calc(18px * var(--screen-scale));line-height:1.8;margin:1.5vh 0 0;color:var(--ink)}
+.sc-companion .sc-question{font-size:calc(16px * var(--screen-scale));color:var(--teal);margin-top:2vh;
+  border-left:3px solid var(--gold);padding-left:14px}
+.sc-companion .sc-source{color:var(--muted);font-size:13px}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-gap:10px;margin-top:2vh}
+.sc-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;
+  font-size:calc(15px * var(--screen-scale));line-height:1.45;display:flex;align-items:center;min-height:72px}
+.sc-item.done{background:var(--panel2);border-color:var(--teal);color:var(--teal)}
+.sc-item .tick{display:inline-flex;width:20px;height:20px;flex:0 0 20px;border:1px solid var(--muted);
+  border-radius:5px;margin-right:10px;align-items:center;justify-content:center;font-size:12px}
+.sc-item.done .tick{background:var(--teal);border-color:var(--teal);color:#10201e}
+.sc-habit .sc-action{font-size:calc(40px * var(--screen-scale));line-height:1.45;font-weight:600;margin:1vh 0 2vh}
+.sc-chips span{display:inline-block;font-size:calc(14px * var(--screen-scale));color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:4px 14px;margin:0 8px 6px 0}
+.sc-sit{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%}
+.sc-sit .breath{width:min(34vh,240px);height:min(34vh,240px)}
+.sc-sit .breath span{font-size:calc(30px * var(--screen-scale))}
+.sc-sit .sc-hintline{color:var(--muted);font-size:calc(16px * var(--screen-scale));margin-top:2vh}
+.sc-stats{display:grid;grid-template-columns:repeat(4,1fr);grid-gap:12px}
+.sc-stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 12px;text-align:center}
+.sc-stat small{display:block;color:var(--muted);font-size:calc(13px * var(--screen-scale))}
+.sc-stat b{display:block;font-size:calc(42px * var(--screen-scale));line-height:1.4;margin-top:6px;color:var(--teal)}
+.sc-week{margin-top:2vh}
+.sc-week .week-row{font-size:calc(13px * var(--screen-scale));margin-top:8px}
+.sc-week .week-row span:first-child{width:88px;flex-basis:88px}
+.sc-week .week-bar{height:12px}
+.sc-progress-note{color:var(--muted);font-size:calc(14px * var(--screen-scale));text-align:center;margin-bottom:1vh}
+
+/* ===== 多端配置抽屉 ===== */
+#cfgBtn{position:fixed;right:12px;bottom:12px;z-index:30;width:30px;height:30px;min-height:30px;padding:0;
+  border-radius:50%;font-size:15px;opacity:.32;transition:opacity .2s}
+#cfgBtn:hover{opacity:1}
+body:not(.screen-mode) #cfgBtn{bottom:100px}
+.cfg-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,.5);z-index:40}
+.cfg-panel{position:fixed;right:0;top:0;bottom:0;width:min(430px,92vw);z-index:41;overflow-y:auto;
+  background:var(--panel);border-left:1px solid var(--line);padding:18px 20px 28px}
+.cfg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.cfg-head b{font-size:18px;letter-spacing:.08em}
+.cfg-head button{min-height:34px;padding:5px 12px}
+.cfg-panel .label{margin:16px 0 8px}
+.cfg-profiles{display:grid;grid-template-columns:1fr 1fr;grid-gap:8px}
+.cfg-profiles button{font-size:12px;min-height:40px;padding:6px}
+.cfg-profiles button.active{border-color:var(--gold);color:var(--gold)}
+.cfg-row{display:flex;gap:12px;margin:8px 0 4px}
+.cfg-row label{flex:1;font-size:12px;color:var(--muted);display:block}
+.cfg-row input,.cfg-row select{width:100%;margin-top:5px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;color:var(--ink);padding:8px;font-family:inherit;font-size:14px;min-height:38px}
+.cfg-row input[type=range]{padding:0;min-height:38px}
+.cfg-modules{display:grid;grid-template-columns:1fr 1fr;grid-gap:6px}
+.cfg-modules label{font-size:12px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:8px;display:flex;align-items:center}
+.cfg-modules input{width:16px;height:16px;margin-right:8px}
+.cfg-actions{display:flex;gap:10px;margin-top:20px}
+.cfg-actions button{flex:1}
+
+/* 矮屏横屏（如红米 Note 2 的 1080×608 CSS 视口）：压缩信息密度，避免顶部被裁 */
+@media (max-height:700px) and (orientation:landscape){
+  #screen{padding-top:10px;padding-bottom:8px}
+  .screen-top{font-size:11px}
+  .screen-progress{margin-top:6px}
+  .screen-hint{font-size:10px}
+  .sc-kicker{font-size:calc(12px * var(--screen-scale));margin-bottom:1vh}
+  .sc-quote blockquote{font-size:calc(36px * var(--screen-scale));line-height:1.4}
+  .sc-quote .sc-source{margin-top:1.5vh;font-size:calc(13px * var(--screen-scale))}
+  .sc-companion .sc-passage{font-size:calc(24px * var(--screen-scale));margin-bottom:1vh}
+  .sc-companion .sc-insight{font-size:calc(14px * var(--screen-scale));line-height:1.6;margin-top:1vh}
+  .sc-companion .sc-question{font-size:calc(13px * var(--screen-scale));margin-top:1vh}
+  .sc-grid{grid-template-columns:repeat(4,1fr);grid-gap:6px;margin-top:1vh}
+  .sc-item{font-size:calc(11px * var(--screen-scale));line-height:1.35;padding:7px 9px;min-height:56px}
+  .sc-item .tick{width:16px;height:16px;flex-basis:16px;margin-right:6px}
+  .sc-habit .sc-action{font-size:calc(30px * var(--screen-scale));margin:0.5vh 0 1vh}
+  .sc-chips span{font-size:calc(12px * var(--screen-scale));padding:2px 10px}
+  .sc-sit .breath{width:min(30vh,170px);height:min(30vh,170px)}
+  .sc-sit .breath span{font-size:calc(24px * var(--screen-scale))}
+  .sc-sit .sc-hintline{font-size:calc(13px * var(--screen-scale));margin-top:1vh}
+  .sc-stats{grid-gap:8px}
+  .sc-stat{padding:10px 8px}
+  .sc-stat small{font-size:calc(11px * var(--screen-scale))}
+  .sc-stat b{font-size:calc(28px * var(--screen-scale));margin-top:2px}
+  .sc-week{margin-top:1vh}
+  .sc-week .week-row{font-size:calc(11px * var(--screen-scale));margin-top:4px}
+  .sc-week .week-bar{height:8px}
+  /* 配置抽屉在矮屏上收紧，一屏内可见全部控件 */
+  .cfg-panel{padding:8px 12px 10px}
+  .cfg-head{margin-bottom:2px}
+  .cfg-head b{font-size:14px}
+  .cfg-head button{min-height:26px;padding:2px 8px;font-size:11px}
+  .cfg-panel .label{margin:5px 0 2px;font-size:9px}
+  .cfg-profiles{grid-gap:4px}
+  .cfg-profiles button{font-size:10px;min-height:26px;padding:2px}
+  .cfg-row{margin:2px 0;gap:6px}
+  .cfg-row label{font-size:9px}
+  .cfg-row input,.cfg-row select{margin-top:1px;padding:3px;font-size:11px;min-height:26px}
+  .cfg-row input[type=range]{min-height:26px}
+  .cfg-modules{grid-template-columns:repeat(3,1fr);grid-gap:3px}
+  .cfg-modules label{font-size:10px;padding:3px}
+  .cfg-modules input{width:13px;height:13px;margin-right:4px}
+  .cfg-actions{position:sticky;bottom:0;z-index:2;margin-top:5px;padding:4px 0 2px;
+    background:var(--panel);border-top:1px solid var(--line)}
+  .cfg-actions button{min-height:28px;padding:3px;font-size:12px}
+  .cfg-modules{margin-bottom:38px}
+  .cfg-panel .footnote{display:none}
+}
+
+@media (orientation:portrait){
+  #screen{padding-left:16px;padding-right:16px}
+  .sc-grid{grid-template-columns:1fr 1fr}
+  .sc-quote blockquote{font-size:calc(38px * var(--screen-scale))}
+  .sc-companion .sc-passage{font-size:calc(26px * var(--screen-scale))}
+  .sc-stats{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1400px) and (orientation:landscape){
+  .sc-grid{grid-template-columns:repeat(4,1fr)}
+}
 @media (max-width:360px){
   .hero blockquote{font-size:22px}.big-quote{font-size:26px}.brand-text small{font-size:8px}
   #tabs button{font-size:9px}
