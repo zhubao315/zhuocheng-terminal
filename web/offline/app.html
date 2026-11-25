@@ -9,6 +9,18 @@
 </head>
 <body>
 <div id="app">
+  <!-- 信息屏：默认形态，全屏轮播、无顶栏/底栏、极少互动 -->
+  <section id="screen" class="screen">
+    <div class="screen-top">
+      <span id="scDate">—</span>
+      <span class="screen-tag"><i></i>纯离线 · 信息屏</span>
+      <span id="scClock">—</span>
+    </div>
+    <div class="screen-progress"><i id="scProgress"></i></div>
+    <div id="scBody" class="screen-body"></div>
+    <div id="scHint" class="screen-hint">轻触换屏 · 双击暂停 · 长按配置</div>
+  </section>
+
   <header id="topbar">
     <div class="brand">
       <span class="seal">拙</span>
@@ -173,6 +185,41 @@
     <button type="button" data-page="sit"><span>静</span>静坐</button>
     <button type="button" data-page="archive"><span>档</span>档案</button>
   </nav>
+
+  <button id="cfgBtn" type="button" aria-label="多端配置">⚙</button>
+  <div id="cfgMask" class="cfg-mask" hidden></div>
+  <aside id="cfgPanel" class="cfg-panel" hidden>
+    <div class="cfg-head"><b>多端配置</b><button id="cfgClose" type="button" class="ghost">关闭</button></div>
+
+    <small class="label">设备预设</small>
+    <div id="cfgProfiles" class="cfg-profiles">
+      <button type="button" data-profile="note2-landscape">红米 Note 2 · 横屏</button>
+      <button type="button" data-profile="note2-portrait">红米 Note 2 · 竖屏</button>
+      <button type="button" data-profile="tablet">平板 / 大屏</button>
+      <button type="button" data-profile="desktop">桌面浏览器</button>
+    </div>
+
+    <small class="label">固定区域留白（像素）</small>
+    <div class="cfg-row"><label>顶部 <input id="cfgTop" type="number" min="0" max="240" step="4"></label>
+      <label>底部 <input id="cfgBottom" type="number" min="0" max="240" step="4"></label></div>
+
+    <small class="label">显示</small>
+    <div class="cfg-row"><label>字号 <input id="cfgScale" type="range" min="0.8" max="1.8" step="0.05"></label>
+      <label>每屏秒数 <input id="cfgSec" type="number" min="5" max="300" step="5"></label></div>
+    <div class="cfg-row"><label>主题
+      <select id="cfgTheme"><option value="dark">夜间</option><option value="light">日间</option></select></label>
+      <label>模式
+      <select id="cfgMode"><option value="screen">信息屏（推荐）</option><option value="full">完整交互</option></select></label></div>
+
+    <small class="label">轮播模块</small>
+    <div id="cfgModules" class="cfg-modules"></div>
+
+    <div class="cfg-actions">
+      <button id="cfgSave" class="primary" type="button">保存并应用</button>
+      <button id="cfgReset" type="button">恢复默认</button>
+    </div>
+    <p class="footnote">配置只存本机。换成其他设备时，选对应预设即可；顶部/底部留白用于避开固定的系统栏或外壳区域。</p>
+  </aside>
 </div>
 <div id="toast"></div>
 <script>/*__DATA__*/</script>
