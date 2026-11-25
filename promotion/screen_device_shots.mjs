@@ -1,4 +1,5 @@
-// 从红米 Note 2 真机 WebView 截取信息屏 2.0 的六个模块 + 多端配置面板。
+// 从红米 Note 2 真机 WebView 截取信息屏 2.1 的六个栏目 + 多端配置面板。
+// 信息屏：默认停在金句，不自动轮播，六个栏目手动左右切换。
 // Usage: node promotion/screen_device_shots.mjs
 import { execFileSync } from 'node:child_process';
 import { writeFile, mkdir } from 'node:fs/promises';
@@ -37,6 +38,7 @@ const ws = new WebSocket(await wsUrl());
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 let id = 0;
 const pending = new Map();
+const errors = [];
 ws.onmessage = (e) => {
   const msg = JSON.parse(e.data);
   if (msg.id && pending.has(msg.id)) {
@@ -44,6 +46,7 @@ ws.onmessage = (e) => {
     pending.delete(msg.id);
     msg.error ? rej(new Error(JSON.stringify(msg.error))) : res(msg.result);
   }
+  if (msg.method === 'Runtime.exceptionThrown') errors.push('EXCEPTION ' + (msg.params.exceptionDetails.text || ''));
 };
 function send(method, params = {}) {
   return new Promise((res, rej) => {
@@ -67,37 +70,44 @@ await mkdir(OUT, { recursive: true });
 await send('Runtime.enable');
 await send('Page.enable');
 
+// 固定为六个栏目 + 横屏预设，保证每张图都能看到完整栏目切换条
+await evalJs("ZC.setConfig({mode:'screen',profile:'note2-landscape',safeTop:0,safeBottom:0,screenScale:1.45,startModule:'quote',screenModules:['quote','companion','rike','habit','sit','archive']})");
 // 选真实内置语料里更有代表性的条目（不造内容）
-await evalJs("(function(){var s=ZC.state(),q=ZC_DATA.quotes;for(var i=0;i<q.length;i++){if(q[i].text.indexOf('结硬寨')>=0){s.idx.quote=i;break;}}var c=ZC_DATA.companions;for(var j=0;j<c.length;j++){if(c[j].source==='曾国藩'){s.idx.companion=j;break;}}return [s.idx.quote,s.idx.companion];})()");
+await evalJs("(function(){var s=ZC.state(),q=ZC_DATA.quotes;for(var i=0;i<q.length;i++){if(q[i].text.indexOf('结硬寨')>=0){s.idx.quote=i;break;}}var c=ZC_DATA.companions;for(var j=0;j<c.length;j++){if(c[j].source==='曾国藩'){s.idx.companion=j;break;}}ZC.screenGo(0);return [s.idx.quote,s.idx.companion];})()");
 
 const modules = [
-  ['quote', '01-信息屏-每日金句.png'],
-  ['companion', '02-信息屏-AI伴读.png'],
-  ['rike', '03-信息屏-日课十二条.png'],
-  ['habit', '04-信息屏-微习惯.png'],
-  ['sit', '05-信息屏-静坐三省.png'],
-  ['archive', '06-信息屏-成长档案.png']
+  [0, '01-信息屏-每日金句.png'],
+  [1, '02-信息屏-AI伴读.png'],
+  [2, '03-信息屏-日课十二条.png'],
+  [3, '04-信息屏-微习惯.png'],
+  [4, '05-信息屏-静坐三省.png'],
+  [5, '06-信息屏-成长档案.png']
 ];
-for (const [key, file] of modules) {
-  await evalJs("ZC.setConfig({mode:'screen',profile:'note2-landscape',safeTop:0,safeBottom:0,screenScale:1.45,screenSec:20,screenModules:['" + key + "']})");
-  await sleep(2600); // 等保存提示消失
+for (const [i, file] of modules) {
+  await evalJs('ZC.screenGo(' + i + ')');
+  await sleep(500);
   await shot(file);
 }
-await evalJs("ZC.openConfig()");
-await sleep(700);
+await evalJs('ZC.openConfig()');
+await sleep(500);
 await shot('07-多端配置.png');
-await evalJs("ZC.closeConfig()");
+await evalJs('ZC.closeConfig()');
 
-// 验证自动轮播：两屏、每屏 5 秒，等待后应换屏
-await evalJs("ZC.setConfig({screenModules:['quote','rike'],screenSec:5})");
-const before = await evalJs("ZC.config().at");
-await sleep(6200);
-const after = await evalJs("ZC.config().at");
-console.log('auto-advance:', before, '->', after, before !== after ? 'OK' : 'FAILED');
+// 验证：默认停在金句、不自动轮播、手动左右切换有效
+await evalJs("ZC.setConfig({startModule:'quote',screenModules:['quote','companion','rike','habit','sit','archive']})");
+const boot = await evalJs('ZC.config().module');
+await sleep(4200);
+const still = await evalJs('ZC.config().module');
+await evalJs('ZC.screenNext()');
+const next = await evalJs('ZC.config().module');
+await evalJs('ZC.screenGo(0)');
+const home = await evalJs('ZC.config().module');
+console.log('default quote:', boot, '| no auto-rotate after 4.2s:', still,
+  '| manual next:', next, '| back home:', home);
+console.log('CHECK:', boot === 'quote' && still === 'quote' && next === 'companion' && home === 'quote' ? 'PASS' : 'FAIL');
 
-// 恢复默认六模块，避免真机停留在截图用的单模块状态
-await evalJs("ZC.setConfig({mode:'screen',profile:'auto',safeTop:0,safeBottom:0,screenScale:1.45,screenSec:20,screenModules:['quote','companion','rike','habit','sit','archive']})");
-await sleep(300);
-
+// 收尾：恢复默认，停在金句
+await evalJs("ZC.setConfig({mode:'screen',profile:'auto',safeTop:0,safeBottom:0,screenScale:1.45,startModule:'quote',screenModules:['quote','companion','rike','habit','sit','archive']})");
+console.log('errors:', errors.length ? errors.join('\n') : 'none');
 console.log('all screenshots saved to', OUT);
 ws.close();
