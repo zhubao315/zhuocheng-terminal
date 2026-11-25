@@ -1,4 +1,5 @@
-// 信息屏模式冒烟测试：无头 Chrome CDP 逐模块截图 + 多端配置验证。
+// 信息屏模式布局回归：无头 Chrome CDP 逐栏目截图 + 多端配置验证。
+// 信息屏为静态常亮屏，默认停在金句，六栏目靠手动左右切换（不自动轮播）。
 // Usage: node promotion/screen_qa.mjs
 import { spawn } from 'node:child_process';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
