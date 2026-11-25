@@ -10,6 +10,8 @@ body.light{
   --warn:#9a6a1c; --danger:#a24c3c; --shadow:rgba(60,50,30,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* hidden 属性必须始终生效：作者样式的 display:flex/grid/block 会覆盖 UA 默认的 [hidden]{display:none} */
+[hidden]{display:none !important}
 html,body{margin:0;padding:0;height:100%}
 body{
   background:var(--bg); color:var(--ink);
@@ -125,7 +127,7 @@ body.screen-mode #app{height:100%;position:relative}
 body.screen-mode #cfgBtn{opacity:.18}
 #screen{display:none;position:absolute;left:0;right:0;top:0;bottom:0;flex-direction:column;overflow:hidden;
   padding:calc(var(--safe-top) + 14px) 24px calc(var(--safe-bottom) + 10px)}
-body.screen-mode #screen{display:flex}
+body.screen-mode #screen{display:flex;-webkit-user-select:none;user-select:none}
 .screen-top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;
   color:var(--muted);font-size:13px;letter-spacing:.05em}
 /* 顶部中间显示品牌名「拙诚日课」，不再显示「纯离线 · 信息屏」 */
