@@ -65,8 +65,8 @@
       settings: {
         theme: 'dark', fontScale: 1, quoteSec: 180, companionSec: 600, habitSec: 3600,
         mode: 'screen', profile: 'auto', safeTop: 0, safeBottom: 0,
-        screenScale: 1.45, screenModules: ALL_MODULES.slice(),
-        startModule: 'quote'
+        screenScale: 1.3, screenModules: ALL_MODULES.slice(),
+        startModule: 'quote', screenQuoteSec: 20, screenCompanionSec: 40
       },
       idx: { quote: 0, companion: 0, habit: 0 },
       paused: { quote: false, companion: false, habit: false },
@@ -93,6 +93,9 @@
     if (!PROFILES[s.settings.profile] && s.settings.profile !== 'auto') s.settings.profile = 'auto';
     if (!s.settings.screenModules || !s.settings.screenModules.length) s.settings.screenModules = ALL_MODULES.slice();
     if (ALL_MODULES.indexOf(s.settings.startModule) < 0) s.settings.startModule = 'quote';
+    // v2.1.1 → v2.1.2 迁移：旧默认值（金句 10 秒 / 字号 1.45）升级为新默认（金句 20 秒 / 字号 1.3）
+    if (s.settings.screenQuoteSec === 10) s.settings.screenQuoteSec = 20;
+    if (s.settings.screenScale === 1.45) s.settings.screenScale = 1.3;
     for (var t in d.idx) { if (s.idx[t] == null) s.idx[t] = 0; }
     for (var p in d.paused) { if (s.paused[p] == null) s.paused[p] = false; }
     if (!s.favs.quote) s.favs.quote = [];
@@ -362,6 +365,8 @@
     $('cfgBottom').value = st.safeBottom;
     $('cfgScale').value = st.screenScale;
     $('cfgStart').value = st.startModule;
+    $('cfgQuoteSec').value = st.screenQuoteSec;
+    $('cfgCompSec').value = st.screenCompanionSec;
     $('cfgTheme').value = st.theme;
     $('cfgMode').value = st.mode;
     var ps = $('cfgProfiles').getElementsByTagName('button');
@@ -400,6 +405,8 @@
     st.screenScale = Math.min(1.8, Math.max(0.8, parseFloat($('cfgScale').value) || 1));
     st.startModule = $('cfgStart').value;
     if (ALL_MODULES.indexOf(st.startModule) < 0) st.startModule = 'quote';
+    st.screenQuoteSec = Math.min(600, Math.max(0, parseInt($('cfgQuoteSec').value, 10) || 0));
+    st.screenCompanionSec = Math.min(600, Math.max(0, parseInt($('cfgCompSec').value, 10) || 0));
     st.theme = $('cfgTheme').value;
     st.mode = $('cfgMode').value;
     st.screenModules = mods.length ? mods : ALL_MODULES.slice();
@@ -653,6 +660,30 @@
         $('ovNext').textContent = '金句 ' + mmss(cfg.quote - (now - lastRun.quote) / 1000) +
           ' · 伴读 ' + mmss(cfg.companion - (now - lastRun.companion) / 1000);
         $('ovUptime').textContent = Math.floor((now - bootAt) / 60000) + ' 分 ' + Math.floor((now - bootAt) / 1000 % 60) + ' 秒';
+      }
+    } else {
+      // 信息屏：栏目仍手动切换；当前栏目内容按设定秒数自动换新（0 = 关）。
+      var qs = parseInt(S.settings.screenQuoteSec, 10) || 0;
+      if (qs > 0 && screenOrder[screenAt] === 'quote' && now - lastRun.quote >= qs * 1000) {
+        lastRun.quote = now;
+        var aq = list('quote');
+        if (aq.length > 1) {
+          var nq = S.idx.quote + 1 + Math.floor(Math.random() * (aq.length - 1));
+          S.idx.quote = nq % aq.length;
+          save();
+          renderScreen();
+        }
+      }
+      var cs = parseInt(S.settings.screenCompanionSec, 10) || 0;
+      if (cs > 0 && screenOrder[screenAt] === 'companion' && now - lastRun.companion >= cs * 1000) {
+        lastRun.companion = now;
+        var ac = list('companion');
+        if (ac.length > 1) {
+          var nc = S.idx.companion + 1 + Math.floor(Math.random() * (ac.length - 1));
+          S.idx.companion = nc % ac.length;
+          save();
+          renderScreen();
+        }
       }
     }
     if (sitRunning) {
