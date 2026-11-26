@@ -279,11 +279,12 @@
       n = rikeDone(today());
       var grid = '';
       for (i = 0; i < D.rike.length; i++) {
-        grid += '<div class="sc-item' + (d.rike[i] ? ' done' : '') + '"><span class="tick">' +
+        grid += '<div class="sc-item' + (d.rike[i] ? ' done' : '') + '" data-i="' + i + '"><span class="tick">' +
           (d.rike[i] ? '✓' : '') + '</span>' + esc(D.rike[i]) + '</div>';
       }
       return '<div class="sc-rike"><span class="sc-kicker">曾国藩日课十二条 · 今日 ' + n + ' / ' +
-        D.rike.length + '</span><div class="sc-grid">' + grid + '</div></div>';
+        D.rike.length + '</span><div class="sc-grid">' + grid + '</div>' +
+        '<div class="sc-tip">点条目即打卡 · 点条目外空白处左右翻栏目</div></div>';
     }
     if (key === 'habit') {
       h = current('habit'); d = ensureDay(today());
@@ -722,10 +723,24 @@
         suppressClick = true;
       }
     }, { passive: true });
-    // 点击屏幕左半区 = 上一栏，右半区 = 下一栏（栏目条与配置按钮各自拦截）
+    // 点击屏幕左半区 = 上一栏，右半区 = 下一栏；日课栏目内点条目 = 打卡（点条目外仍翻页）
     sc.addEventListener('click', function (e) {
       if (suppressClick || Date.now() - swipedAt < 400) { suppressClick = false; return; }
       if (!$('cfgPanel').hidden) return;
+      if (screenOrder[screenAt] === 'rike') {
+        var item = e.target;
+        while (item && item !== sc && !(item.className && item.className.indexOf('sc-item') >= 0)) item = item.parentNode;
+        if (item && item !== sc && item.getAttribute('data-i') != null) {
+          var ri = parseInt(item.getAttribute('data-i'), 10);
+          var rd = ensureDay(today());
+          rd.rike[ri] = !rd.rike[ri];
+          save();
+          renderScreen();
+          toast(rd.rike[ri] ? '✓ ' + D.rike[ri].split(' · ')[0] + ' · 今日 ' + rikeDone(today()) + '/' + D.rike.length
+            : '已取消 · ' + D.rike[ri].split(' · ')[0]);
+          return;
+        }
+      }
       var x = e.clientX;
       if (x == null) x = window.innerWidth / 2;
       screenStep(x < window.innerWidth / 2 ? -1 : 1);
